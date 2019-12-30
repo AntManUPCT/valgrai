@@ -36,8 +36,8 @@ class entrenador:
         self.seq.append(codigo)
 
     def pasar_turno(self):
-        codigo = 0
-        #self.seq.append(keras.utils.to_categorical(codigo, num_classes=NCLS))
+        codigo = -1
+        #self.seq.append(np.zeros(NCLS))
         self.seq.append(codigo)
 
     def fin_juego(self, j1, j2, j3, j4, turno):
