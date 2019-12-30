@@ -69,7 +69,8 @@ def calcular_opciones(mesa, fichas):
     return result
 
 class domino_cb:
-    def __init__(self, poner, pasar, fin):
+    def __init__(self, elegir, poner, pasar, fin):
+        self.elegir = elegir
         self.poner = poner
         self.pasar = pasar
         self.fin = fin
@@ -83,7 +84,7 @@ def play(mesa, j1, j2, j3, j4, turno, pasan, cb):
 
     opciones = calcular_opciones(mesa, j1)
     if len(opciones) > 0:
-        jugada = random.choice(opciones)
+        jugada = cb.elegir(opciones)
         l = jugada[0]
         i = jugada[1]
         ficha = j1[i]
@@ -119,6 +120,7 @@ def play_game():
     print(j1, j2, j3, j4, sep='\n')
 
     cb = domino_cb(
+        lambda o: o[0],
         lambda l, f: print(l, f),
         lambda: print('Paso'),
         lambda j1,j2,j3,j4,t: end_game(j1, j2, j3, j4, t)

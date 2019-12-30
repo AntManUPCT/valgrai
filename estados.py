@@ -1,3 +1,6 @@
+#from . import juego
+from juego import *
+
 import numpy as np
 
 def explog(x):
@@ -14,6 +17,9 @@ def loglin(x):
 
 CODG={f:i for (f, i) in zip(MAZO, range(MLEN))}
 #code = CODG[ficha]
+
+def elegir_ficha(opciones):
+    return random.choice(opciones)
 
 def poner_ficha(lado, ficha):
     codigo = CODG[ficha]
@@ -45,6 +51,7 @@ def entrenar_autoencoder():
     print(j1, j2, j3, j4, sep='\n')
 
     cb = domino_cb(
+        lambda o: random.choice(o),
         lambda l, f: poner_ficha(l, f),
         lambda: pasar_turno(),
         lambda j1,j2,j3,j4,t: fin_juego(j1, j2, j3, j4, t)
