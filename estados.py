@@ -3,6 +3,11 @@ from juego import *
 import csv
 import numpy as np
 import keras
+from keras.models import Sequential
+from keras.layers import LSTM
+from keras.layers import Dense
+from keras.layers import RepeatVector
+from keras.layers import TimeDistributed
 
 def explog(x):
     return (np.exp(x) - 1)*(x <= 0) + np.log(x + 1)*(x > 0)
@@ -17,12 +22,13 @@ def loglin(x):
     return -np.log(1 - x)*(x <= 0) + x*(x > 0)
 
 CODG={f:i for (f, i) in zip(MAZO, range(MLEN))}
-NCLS=2*MLEN
+
+NFEAT = MLEN + 2
 
 def elegir_ficha(opciones):
     return random.choice(opciones)
 
-class entrenador:
+class generador:
 
     def __init__(self):
         self.seq = []
@@ -32,12 +38,10 @@ class entrenador:
         codigo = CODG[ficha]
         if lado == 'L':
             codigo = MLEN + codigo
-        #self.seq.append(keras.utils.to_categorical(codigo, num_classes=NCLS))
         self.seq.append(codigo)
 
     def pasar_turno(self):
         codigo = -1
-        #self.seq.append(np.zeros(NCLS))
         self.seq.append(codigo)
 
     def fin_juego(self, j1, j2, j3, j4, turno):
@@ -80,8 +84,59 @@ class entrenador:
         data_file.close()
         label_file.close()
 
+class entrenador:
+
+    def __init__(self, csvfile):
+        samples = []
+        with open(csvfile) as file:
+            for line in file.readlines():
+                samples.append(self.encode_sample(eval('['+line[0:-1]+']')))
+        self.data = np.array(samples)
+
+    def encode_sample(self, seq):
+        data = []
+        for x in seq:
+            if x<0:
+                data.append(np.zeros(NFEAT))
+            else:
+                coded = keras.utils.to_categorical(x % MLEN, num_classes=NFEAT)
+                if x < MLEN:
+                    coded[MLEN]=1
+                else:
+                    coded[MLEN+1]=1
+                data.append(coded)
+        return data
+
+    def entrenar(self):
+        X = self.data
+        samples, timesteps, n_features = X.shape
+
+        # define model
+        model = Sequential()
+        model.add(LSTM(128, activation='relu', input_shape=(timesteps, n_features), return_sequences=True))
+        model.add(LSTM(64, activation='relu', return_sequences=False))
+        model.add(RepeatVector(timesteps))
+        model.add(LSTM(64, activation='relu', return_sequences=True))
+        model.add(LSTM(128, activation='relu', return_sequences=True))
+        model.add(TimeDistributed(Dense(n_features)))
+        model.compile(optimizer='adam', loss='mse')
+        model.summary()
+
+        # fit model
+        model.fit(X, X, epochs=1, batch_size=100, verbose=1)
+        
+        # demonstrate reconstruction
+        yhat = model.predict(X[0:1], verbose=0)
+        print('---Predicted---')
+        print(np.round(yhat, 1))
+        print('---Actual---')
+        print(np.round(X[0:1], 1))
+
 if __name__ == "__main__":
     import sys
     
-    gen = entrenador()
-    gen.generar(int(sys.argv[1]), sys.argv[2]) 
+    #gen = generador()
+    #gen.generar(int(sys.argv[1]), sys.argv[2])
+
+    ent = entrenador(sys.argv[1])
+    ent.entrenar()

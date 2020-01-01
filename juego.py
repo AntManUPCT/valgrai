@@ -59,6 +59,9 @@ def end_game(j1, j2, j3, j4, turno):
         print('J{} Puntos: {} {}'.format(i, score_fichas(q), repr(q)))
 
 def calcular_opciones(mesa, fichas):
+    if len(mesa) == 0:
+        return [('F', i) for i in range(len(fichas))]
+
     result=[]
     for i in range(len(fichas)):
         ficha = fichas[i]
@@ -92,20 +95,14 @@ def play(mesa, j1, j2, j3, j4, turno, pasan, cb):
 
         if l == 'F':
             mesa = put_first(ficha, mesa)
-            del j1[i]
-            if len(j1) > 0:
-                play(mesa, j2, j3, j4, j1, siguiente, 0, cb)
-            else:
-                cb.fin(j1, j2, j3, j4, turno)
-            return
-        if l == 'L':
+        elif l == 'L':
             mesa = put_last(ficha, mesa)
-            del j1[i]
-            if len(j1) > 0:
-                play(mesa, j2, j3, j4, j1, siguiente, 0, cb)
-            else:
-                cb.fin(j1, j2, j3, j4, turno)
-            return
+            
+        del j1[i]
+        if len(j1) > 0:
+            play(mesa, j2, j3, j4, j1, siguiente, 0, cb)
+        else:
+            cb.fin(j1, j2, j3, j4, turno)
     else:
         cb.pasar()
         play(mesa, j2, j3, j4, j1, siguiente, pasan+1, cb)
@@ -123,7 +120,7 @@ def play_game():
         lambda o: o[0],
         lambda l, f: print(l, f),
         lambda: print('Paso'),
-        lambda j1,j2,j3,j4,t: end_game(j1, j2, j3, j4, t)
+        end_game
         )
 
     play('', j1, j2, j3, j4, 0, 0, cb)
