@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from juego import *
+
+import gc
 import csv
 import numpy as np
 import keras
@@ -89,9 +91,16 @@ class entrenador:
     def __init__(self, csvfile):
         samples = []
         with open(csvfile) as file:
+            cont = 1
             for line in file.readlines():
                 samples.append(self.encode_sample(eval('['+line[0:-1]+']')))
+                cont += 1
+                if cont % 1000 == 0:
+                    print(cont, end='\r')
+                    gc.collect()
+
         self.data = np.array(samples)
+        gc.collect()
 
     def encode_sample(self, seq):
         data = []
@@ -123,7 +132,7 @@ class entrenador:
         model.summary()
 
         # fit model
-        model.fit(X, X, epochs=1, batch_size=100, verbose=1)
+        model.fit(X, X, epochs=5, batch_size=100, verbose=1)
         
         # demonstrate reconstruction
         yhat = model.predict(X[0:1], verbose=0)
