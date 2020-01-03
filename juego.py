@@ -51,6 +51,9 @@ def put_last(ficha, fichas):
         ficha = swap(ficha)
     return fichas + ficha[-1]
 
+def puntos_juego(j1, j2, j3, j4):
+    return [p for p in map(score_fichas, [j1, j2, j3, j4])]
+
 def end_game(j1, j2, j3, j4, turno):
     print('----- Fin juego -----')
     index = [turno, (turno+1)%4, (turno+2)%4, (turno+3)%4]

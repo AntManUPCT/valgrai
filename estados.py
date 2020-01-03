@@ -10,6 +10,7 @@ from keras.layers import LSTM
 from keras.layers import Dense
 from keras.layers import RepeatVector
 from keras.layers import TimeDistributed
+from PIL import Image, ImageDraw
 
 def explog(x):
     return (np.exp(x) - 1)*(x <= 0) + np.log(x + 1)*(x > 0)
@@ -141,11 +142,68 @@ class entrenador:
         print('---Actual---')
         print(np.round(X[0:1], 1))
 
+
+IMG_ALTO = 50
+IMG_ANCHO = 1 + MLEN + 2
+
+class entrenador_imagenes:
+
+    def __init__(self, csvfile, samples):
+        self.images = np.zeros((samples, IMG_ALTO, IMG_ANCHO), dtype='uint8')
+        with open(csvfile) as file:
+            cont = 0
+            for line in file.readlines():
+                self.encode_image(eval('['+line[0:-1]+']'), self.images[cont])
+                cont += 1
+                if cont % 1000 == 0:
+                    print(cont, end='\r')
+                if cont == samples:
+                    break
+
+    def encode_image(self, seq, img):
+        row = 0
+        for x in seq:
+            if x>=0:
+                img[row, x % MLEN] = 255
+                if x < MLEN:
+                    img[row, MLEN] = 255
+                else:
+                    img[row, MLEN + 1] = 255
+            img[row, MLEN + 2] = 255
+            row += 1
+
+    def entrenar_DQRL(self):
+        X = self.data
+        samples, n_features = X.shape
+
+        # define model
+        model = Sequential()
+
+        model.compile(optimizer='adam', loss='mse')
+        model.summary()
+
+        # fit model
+        model.fit(X, X, epochs=5, batch_size=100, verbose=1)
+
+        # demonstrate reconstruction
+        yhat = model.predict(X[0:1], verbose=0)
+        print('---Predicted---')
+        print(np.round(yhat, 1))
+        print('---Actual---')
+        print(np.round(X[0:1], 1))
+
 if __name__ == "__main__":
     import sys
     
     #gen = generador()
     #gen.generar(int(sys.argv[1]), sys.argv[2])
 
-    ent = entrenador(sys.argv[1])
-    ent.entrenar()
+    #ent = entrenador(sys.argv[1])
+    #ent.entrenar()
+
+    #ent = entrenador_imagenes(sys.argv[1], sys.argv[2])
+    #imagenes = ent.images[0:50]
+    #img = Image.fromarray(imagenes[0])
+    #img.show()
+
+    coder = codificador():
