@@ -72,6 +72,10 @@ class Jugador:
         self.turno = turno % JUGADORES
         self.jugado = jugado
 
+    def __repr__(self):
+        jugado = '\n'.join([''.join(map(lambda x: ' ' if x == 0 else '*', f)) for f in self.jugado])
+        return 'Jugador('+str(self.turno) + ',\n' + str(self.fichas) + ',\n' + jugado+')'
+
     def ficha(self, indx):
         return self.fichas[indx]
 
@@ -91,10 +95,15 @@ class Jugador:
                 result.append(('L', i))
         return result
 
-    def jugar(self, lado, ficha, turno):
+    def jugar(self, lado, ficha, turno, indx):
         # Esto se hace para todos los jugadores
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
+
+        # Si muveo yo quitar la ficha puesta
+        if self.turno == (turno % JUGADORES):
+            fichas.pop(indx)
+
         code = CODG[ficha]
         jugado[turno, code] = 255
         if lado == 'F':
@@ -103,25 +112,20 @@ class Jugador:
             jugado[turno, LADO_L]=255
         jugado[turno, JUGADO] = 255
 
-        return Jugador(self.turno, fichas, jugado)
+        # Pintar las que me quedan
+        for ficha in fichas:
+            code = CODG[ficha]
+            jugado[turno, MLEN + code] = 255
 
-    def ficha_usada(self, indx, turno):
-        # Esto es solo para el jugador que mueve ficha
-        if self.turno == (turno % JUGADORES):
-            self.fichas.pop(indx)
-            for ficha in self.fichas:
-                code = CODG[ficha]
-                self.jugado[turno, MLEN + code] = 255
+        return Jugador(self.turno, fichas, jugado)
 
     def pasar(self, turno):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
         jugado[turno, JUGADO] = 255
-        # Esto es solo para el jugador que mueve ficha
-        if self.turno == (turno % JUGADORES):
-            for ficha in self.fichas:
-                code = CODG[ficha]
-                jugado[turno, MLEN + code] = 255
+        for ficha in self.fichas:
+            code = CODG[ficha]
+            jugado[turno, MLEN + code] = 255
         
         return Jugador(self.turno, fichas, jugado)
 
@@ -147,6 +151,9 @@ class Estado:
         self.pasan = pasan
         self.mesa = mesa
 
+    def __repr__(self):
+        return 'Estado(\n' + '\n'.join(map(str, self.jugadores)) + ',\n' + str(self.turno) + ',\n' + str(self.pasan) + ',\n"' + self.mesa + '")'
+
     def jugador(self):
         indx = self.turno % JUGADORES
         return self.jugadores[indx]
@@ -163,8 +170,7 @@ class Estado:
         indx = jugada[1]
         ficha = self.jugador().ficha(indx)
 
-        jugadores = [j.jugar(lado, ficha, self.turno) for j in self.jugadores]
-        jugadores[self.turno % JUGADORES].ficha_usada(indx, self.turno)
+        jugadores = [j.jugar(lado, ficha, self.turno, indx) for j in self.jugadores]
         mesa = poner_ficha(self.mesa, lado, ficha)
         return Estado(jugadores, self.turno + 1, 0, mesa)
 
@@ -210,7 +216,7 @@ def play_game():
     
     cb = domino_cb(
         lambda o: o[0],
-        lambda state, puntos: print(state.mesa, puntos)
+        lambda state, puntos: print(state, puntos)
         )
 
     mezcla = shuffle()
