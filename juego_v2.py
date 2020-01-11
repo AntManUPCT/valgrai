@@ -29,18 +29,6 @@ def score_fichas(fichas):
 
 MAX_PUNTOS = score_fichas(MAZO)
 
-def rotate_right(v):
-    rr = np.empty(v.shape, dtype=v.dtype)
-    rr[0]  = v[-1]
-    rr[1:] = v[0:-1]
-    return rr
-
-def rotate_left(v):
-    rl = np.empty(v.shape, dtype=v.dtype)
-    rl[-1] = v[0]
-    rl[0:-1] = v[1:]
-    return rl
-
 def try_first(ficha, fichas):
     if len(fichas) == 0:
         return True
@@ -241,4 +229,4 @@ def play_game():
     
     puntos = play(state, cb)
     print("Puntos despues: ", puntos)
-    
+
