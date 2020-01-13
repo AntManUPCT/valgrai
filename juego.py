@@ -1,130 +1,61 @@
-import random
-
-MAZO=[str(a)+str(b) for a in range(7) for b in range(a, 7)]
-MLEN=len(MAZO)
-
-def swap(ficha):
-    return ficha[1] + ficha[0]
-
-def match(ficha, num):
-    return num in ficha
-
-def shuffle():
-    result = MAZO.copy()
-    random.shuffle(result)
-    return result
-
-def take(fichas, num):
-    taken = fichas[0:num]
-    del fichas[0:num]
-    return taken
-
-def score_ficha(ficha):
-    return int(ficha[0]) + int(ficha[1])
-
-def score_fichas(fichas):
-    return sum(map(score_ficha, fichas))
-
-MAX_PUNTOS = score_fichas(MAZO)
-
-def try_first(ficha, fichas):
-    if len(fichas) == 0:
-        return True
-    return match(ficha, fichas[0])
-
-def try_last(ficha, fichas):
-    if len(fichas) == 0:
-        return True
-    return match(ficha, fichas[-1])
-
-def put_first(ficha, fichas):
-    if len(fichas) == 0:
-        return ficha
-    if ficha[0] == fichas[0]:
-        ficha = swap(ficha)
-    return ficha[0] + fichas
-
-def put_last(ficha, fichas):
-    if len(fichas) == 0:
-        return ficha
-    if ficha[-1] == fichas[-1]:
-        ficha = swap(ficha)
-    return fichas + ficha[-1]
-
-def puntos_juego(j1, j2, j3, j4):
-    return [p for p in map(score_fichas, [j1, j2, j3, j4])]
-
-def end_game(j1, j2, j3, j4, turno):
-    print('----- Fin juego -----')
-    index = [turno, (turno+1)%4, (turno+2)%4, (turno+3)%4]
-    queda = [j1, j2, j3, j4]
-    for (i, q) in zip(index, queda):
-        print('J{} Puntos: {} {}'.format(i, score_fichas(q), repr(q)))
-
-def calcular_opciones(mesa, fichas):
-    if len(mesa) == 0:
-        return [('F', i) for i in range(len(fichas))]
-
-    result=[]
-    for i in range(len(fichas)):
-        ficha = fichas[i]
-        if try_first(ficha, mesa):
-            result.append(('F', i))
-        if try_last(ficha, mesa):
-            result.append(('L', i))
-    return result
+#!/usr/bin/env python3
+from .domino import shuffle, take
+from .jugador import Jugador
+from .estado import Estado
 
 class domino_cb:
-    def __init__(self, elegir, poner, pasar, fin):
+    def __init__(self, elegir, puntos):
         self.elegir = elegir
-        self.poner = poner
-        self.pasar = pasar
-        self.fin = fin
+        self.puntos = puntos
 
-def play(mesa, j1, j2, j3, j4, turno, pasan, cb):
-    if pasan==4:
-        cb.fin(j1, j2, j3, j4, turno)
-        return
+def play(state, cb, gamma=1.0):
+    '''Devuelve una lista de puntos conseguidos'''
+    if state.pasan==4:
+        puntos = state.puntos()
+        # El callback es para notificar el estado y la recompensa
+        cb.puntos(state, puntos)
+        return puntos
 
-    siguiente = (turno + 1) % 4
-
-    opciones = calcular_opciones(mesa, j1)
+    opciones = state.opciones()
     if len(opciones) > 0:
-        jugada = cb.elegir(opciones)
-        l = jugada[0]
-        i = jugada[1]
-        ficha = j1[i]
-        cb.poner(l, ficha)
+        jugada = cb.elegir(opciones, state.turno)
+        
+        new_state = state.jugar(jugada)
 
-        if l == 'F':
-            mesa = put_first(ficha, mesa)
-        elif l == 'L':
-            mesa = put_last(ficha, mesa)
-            
-        del j1[i]
-        if len(j1) > 0:
-            play(mesa, j2, j3, j4, j1, siguiente, 0, cb)
-        else:
-            cb.fin(j1, j2, j3, j4, turno)
-    else:
-        cb.pasar()
-        play(mesa, j2, j3, j4, j1, siguiente, pasan+1, cb)
+        if new_state.fin_partida():
+            puntos = new_state.puntos()
+            cb.puntos(new_state, puntos)
+            return puntos
 
-def play_game():
-    mezcla = shuffle()
-    j1 = take(mezcla, 7)
-    j2 = take(mezcla, 7)
-    j3 = take(mezcla, 7)
-    j4 = take(mezcla, 7)
+        puntos = play(new_state, cb, gamma) * gamma
+        cb.puntos(state, puntos)
+        return puntos
 
-    print(j1, j2, j3, j4, sep='\n')
+    new_state = state.pasar()
+    puntos = play(new_state, cb, gamma) * gamma
+    cb.puntos(state, puntos)
+    return puntos
 
+def play_game(gamma = 1.0):
+    
     cb = domino_cb(
-        lambda o: o[0],
-        lambda l, f: print(l, f),
-        lambda: print('Paso'),
-        end_game
+        lambda opciones, turno: opciones[0],
+        lambda state, puntos: print(state.mesa, puntos)
         )
 
-    play('', j1, j2, j3, j4, 0, 0, cb)
+    mezcla = shuffle()
+    j1 = Jugador(0, take(mezcla, 7))
+    j2 = Jugador(1, take(mezcla, 7))
+    j3 = Jugador(2, take(mezcla, 7))
+    j4 = Jugador(3, take(mezcla, 7))
+
+    print(j1.fichas)
+    print(j2.fichas)
+    print(j3.fichas)
+    print(j4.fichas)
+
+    state = Estado([j1, j2, j3,j4])
+    print("Puntos antes:", state.puntos())
     
+    puntos = play(state, cb, gamma)
+    print("Puntos despues: ", puntos)
