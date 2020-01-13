@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from .domino import shuffle, take
-from .jugador import Jugador
-from .estado import Estado
+from domino import shuffle, take
+from jugador import Jugador
+from estado import Estado
 
 class domino_cb:
     def __init__(self, elegir, puntos):

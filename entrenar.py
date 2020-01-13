@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from . import juego_v2 as juego
-from .jugador import IMG_ALTO, IMG_ANCHO
+import juego
+from jugador import IMG_ALTO, IMG_ANCHO
 
 import numpy as np
 from keras.models import Sequential
@@ -44,15 +44,16 @@ def generador():
         state = juego.Estado([j1, j2, j3,j4])
         cb = juego.domino_cb(eleccion, recompensa)
 
-        puntos = juego.play(state, cb)
-        print(puntos)
+        juego.play(state, cb)
+        #puntos = juego.play(state, cb)
+        #print(puntos)
 
 def entrenar():
 
     model = Sequential()
 
     model.add(Dense(100, activation='relu', input_shape=(IMG_ITEMS,)))
-    model.add(Dense(50), activation='relu')
+    model.add(Dense(50, activation='relu'))
     model.add(Dense(1))
 
     print(model.summary(90))

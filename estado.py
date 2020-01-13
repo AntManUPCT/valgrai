@@ -6,8 +6,8 @@ Created on Mon Jan 13 10:36:35 2020
 @author: manuel
 """
 
-from .domino import MLEN,
-from .jugador import Jugador
+from domino import JUGADORES, poner_ficha
+import numpy as np
 
 class Estado:
     '''

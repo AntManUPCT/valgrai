@@ -6,7 +6,8 @@ Created on Mon Jan 13 10:32:50 2020
 @author: manuel
 """
 
-from .domino import MLEN,
+from domino import MLEN, JUGADORES, CODG, score_fichas, try_first, try_last
+import numpy as np
 
 IMG_ALTO = 50
 IMG_ANCHO = MLEN + MLEN + 3
