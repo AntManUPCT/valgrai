@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import domino
 import juego
 from jugador import IMG_ALTO, IMG_ANCHO
 
@@ -24,45 +25,72 @@ def loglin(x):
 
 IMG_ITEMS = IMG_ALTO*IMG_ANCHO
 
-def eleccion(opciones, turno):
-    return opciones[0]
+class generador:
 
-def recompensa(state, puntos):
-    indx = state.turno % juego.JUGADORES    
-    x_train = state.jugadores[indx].jugado.reshape((juego.IMG_ITEMS))
-    y_train = puntos[indx]
-    yield x_train, y_train
+    def __init__(self, model, bs):
+        self.model = model
+        self.bs = bs
+        self.maxsize = 4*bs
+        self.offset = 0
+        self.x_train = np.zeros((self.maxsize, IMG_ITEMS), dtype='float32')
+        self.y_train = np.zeros((self.maxsize, 1), dtype='float32')
+        self.lote = 0
+        self.indx = 0
+        self.dc = 0
+        self.cb = juego.domino_cb(self.eleccion, self.recompensa)
 
-def generador():
-    while True:
-        mezcla = juego.shuffle()
-        j1 = juego.Jugador(0, juego.take(mezcla, 7))
-        j2 = juego.Jugador(1, juego.take(mezcla, 7))
-        j3 = juego.Jugador(2, juego.take(mezcla, 7))
-        j4 = juego.Jugador(3, juego.take(mezcla, 7))
+    def eleccion(self, opciones, turno):
+        return opciones[0]
 
-        state = juego.Estado([j1, j2, j3,j4])
-        cb = juego.domino_cb(eleccion, recompensa)
+    def recompensa(self, state, puntos):
+        indx = state.turno % domino.JUGADORES # Indice del jugador segun su turno
+        self.x_train[self.indx, :] = state.jugadores[indx].jugado.reshape((IMG_ITEMS,))
+        self.y_train[self.indx, :] = puntos[indx]
+        self.indx = (self.indx + 1) % self.maxsize # Indice en el buffer circular
+        self.dc = self.dc + 1 # data counter
 
-        juego.play(state, cb)
-        #puntos = juego.play(state, cb)
-        #print(puntos)
+    def generar(self):
+        while True:
+            while self.dc >= self.bs:
+                self.lote = self.lote + 1
+                first = self.offset
+                last = first + self.bs
+                self.offset = last % self.maxsize
+                self.dc = self.dc - self.bs
+                yield self.x_train[first:last, :], self.y_train[first:last, :]
 
-def entrenar():
+            while self.dc < self.bs:
+                mezcla = juego.shuffle()
+                j1 = juego.Jugador(0, juego.take(mezcla, 7))
+                j2 = juego.Jugador(1, juego.take(mezcla, 7))
+                j3 = juego.Jugador(2, juego.take(mezcla, 7))
+                j4 = juego.Jugador(3, juego.take(mezcla, 7))
 
+                state = juego.Estado([j1, j2, j3,j4])
+
+                juego.play(state, self.cb)
+
+def modelo():
     model = Sequential()
-
     model.add(Dense(100, activation='relu', input_shape=(IMG_ITEMS,)))
     model.add(Dense(50, activation='relu'))
     model.add(Dense(1))
-
     print(model.summary(90))
-
+    return model
+    
+def entrenar():
+    model = modelo()
+    gen = generador(model, 100)
     model.compile(loss='mean_squared_error', optimizer='sgd')
-    model.fit_generator(generador(), steps_per_epoch=30, epochs=10, verbose=1)
+    model.fit_generator(gen.generar(), steps_per_epoch=1000, epochs=100, verbose=2)
 
+def probar():
+    model = modelo()
+    gen = generador(model, 100)
+    gen.generar()
+    
 if __name__ == "__main__":
     
     entrenar()
-    
+    #probar()
     
