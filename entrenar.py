@@ -4,10 +4,12 @@ import juego
 from jugador import IMG_ITEMS 
 import estrategia
 
+import random
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 #from PIL import Image, ImageDraw
+import matplotlib.pyplot as plt
 
 def explog(x):
     return (np.exp(x) - 1)*(x <= 0) + np.log(x + 1)*(x > 0)
@@ -35,32 +37,30 @@ class generador:
         self.offset = 0
         self.x_train = np.zeros((self.maxsize, IMG_ITEMS), dtype='float32')
         self.y_train = np.zeros((self.maxsize, 1), dtype='float32')
-        self.lote = 0
         self.indx = 0
         self.dc = 0
         self.cb = juego.domino_cb(self.eleccion, self.recompensa)
 
-    def aleatoria(self, jugadr, opciones, turno):
-        return opciones[0]
-
     def eleccion(self, jugadr, opciones, turno):
-        return self.policy.elegir(jugadr, opciones, turno)
+        if random.random() > 0.9:
+            return opciones[0]
+        else:
+            return self.policy.elegir(jugadr, opciones, turno)
 
     def recompensa(self, state, puntos):
         indx = state.turno % domino.JUGADORES # Indice del jugador segun su turno
         self.x_train[self.indx, :] = state.jugadores[indx].jugado.reshape((IMG_ITEMS,))
         self.y_train[self.indx, :] = puntos[indx]
         self.indx = (self.indx + 1) % self.maxsize # Indice en el buffer circular
-        self.dc = self.dc + 1 # data counter
+        self.dc += 1 # data counter
 
     def generar(self):
         while True:
             while self.dc >= self.bs:
-                self.lote = self.lote + 1
                 first = self.offset
                 last = first + self.bs
                 self.offset = last % self.maxsize
-                self.dc = self.dc - self.bs
+                self.dc -= self.bs
                 yield self.x_train[first:last, :], self.y_train[first:last, :]
 
             while self.dc < self.bs:
@@ -76,25 +76,30 @@ class generador:
 
 def modelo():
     model = Sequential()
-    model.add(Dense(50, activation='relu', input_shape=(IMG_ITEMS,)))
-    model.add(Dense(50, activation='relu'))
+    model.add(Dense(20, activation='relu', input_shape=(IMG_ITEMS,)))
     model.add(Dense(1))
     print(model.summary(90))
     return model
     
 def entrenar():
     model = modelo()
-    gen = generador(model, 2000, 0.95)
+    gen = generador(model, 10000, 0.95)
     model.compile(loss='mean_squared_error', optimizer='sgd')
-    model.fit_generator(gen.generar(), steps_per_epoch=50, epochs=10, verbose=1)
+    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=10, verbose=1)
+    graficar(history)
 
-def probar():
-    model = modelo()
-    gen = generador(model, 100)
-    gen.generar()
-    
+def graficar(history):
+    hdict = history.history
+    loss = hdict['loss']
+    epochs = range(1, len(loss) + 1)
+
+    plt.plot(epochs, loss, 'b', label='Loss')
+    plt.title('Error de entrenamiento')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.show()
+
 if __name__ == "__main__":
     
     entrenar()
-    #probar()
     
