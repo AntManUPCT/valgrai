@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import domino
 import juego
-from jugador import IMG_ALTO, IMG_ANCHO
+from jugador import IMG_ITEMS 
+import estrategia
 
 import numpy as np
 from keras.models import Sequential
@@ -23,13 +24,13 @@ def loglin(x):
 # La funcion choice() seleccionará una accion usando el modelo provisional
 # La funcion puntuar() entrenara el modelo con las recompensas obtenidas
 
-IMG_ITEMS = IMG_ALTO*IMG_ANCHO
-
 class generador:
 
-    def __init__(self, model, bs):
+    def __init__(self, model, bs, gamma=1.0):
         self.model = model
+        self.policy = estrategia.Estrategia(model)
         self.bs = bs
+        self.gamma = gamma
         self.maxsize = 4*bs
         self.offset = 0
         self.x_train = np.zeros((self.maxsize, IMG_ITEMS), dtype='float32')
@@ -39,8 +40,11 @@ class generador:
         self.dc = 0
         self.cb = juego.domino_cb(self.eleccion, self.recompensa)
 
-    def eleccion(self, opciones, turno):
+    def aleatoria(self, jugadr, opciones, turno):
         return opciones[0]
+
+    def eleccion(self, jugadr, opciones, turno):
+        return self.policy.elegir(jugadr, opciones, turno)
 
     def recompensa(self, state, puntos):
         indx = state.turno % domino.JUGADORES # Indice del jugador segun su turno
@@ -68,11 +72,11 @@ class generador:
 
                 state = juego.Estado([j1, j2, j3,j4])
 
-                juego.play(state, self.cb)
+                juego.play(state, self.cb, self.gamma)
 
 def modelo():
     model = Sequential()
-    model.add(Dense(100, activation='relu', input_shape=(IMG_ITEMS,)))
+    model.add(Dense(50, activation='relu', input_shape=(IMG_ITEMS,)))
     model.add(Dense(50, activation='relu'))
     model.add(Dense(1))
     print(model.summary(90))
@@ -80,9 +84,9 @@ def modelo():
     
 def entrenar():
     model = modelo()
-    gen = generador(model, 100)
+    gen = generador(model, 2000, 0.95)
     model.compile(loss='mean_squared_error', optimizer='sgd')
-    model.fit_generator(gen.generar(), steps_per_epoch=1000, epochs=100, verbose=2)
+    model.fit_generator(gen.generar(), steps_per_epoch=50, epochs=10, verbose=1)
 
 def probar():
     model = modelo()

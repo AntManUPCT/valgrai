@@ -37,8 +37,7 @@ class Estado:
 
     def jugar(self, jugada):
         ''' Devolver el nuevo estado '''
-        lado = jugada[0]
-        indx = jugada[1]
+        lado, indx = jugada
         ficha = self.jugador().ficha(indx)
 
         jugadores = [j.jugar(lado, ficha, self.turno, indx) for j in self.jugadores]

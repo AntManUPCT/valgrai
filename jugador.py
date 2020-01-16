@@ -11,6 +11,7 @@ import numpy as np
 
 IMG_ALTO = 50
 IMG_ANCHO = MLEN + MLEN + 3
+IMG_ITEMS = IMG_ALTO*IMG_ANCHO
 LADO_F = MLEN + MLEN
 LADO_L = LADO_F + 1
 JUGADO = LADO_L + 1
@@ -49,7 +50,7 @@ class Jugador:
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
-        # Si muveo yo quitar la ficha puesta
+        # Si muevo yo quitar la ficha puesta
         if self.turno == (turno % JUGADORES):
             fichas.pop(indx)
 
