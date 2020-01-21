@@ -41,7 +41,7 @@ class generador:
         self.dc = 0
         self.cb = juego.domino_cb(self.eleccion, self.recompensa)
 
-    def eleccion(self, jugadr, opciones, turno):
+    def eleccion(self, mesa, jugadr, opciones, turno):
         if random.random() > 0.9:
             return opciones[0]
         else:
@@ -76,16 +76,18 @@ class generador:
 
 def modelo():
     model = Sequential()
-    model.add(Dense(20, activation='relu', input_shape=(IMG_ITEMS,)))
+    model.add(Dense(64, activation='relu', input_shape=(IMG_ITEMS,)))
+    model.add(Dense(32, activation='relu'))
     model.add(Dense(1))
     print(model.summary(90))
     return model
     
-def entrenar():
-    model = modelo()
+def entrenar(model):
     gen = generador(model, 10000, 0.95)
-    model.compile(loss='mean_squared_error', optimizer='sgd')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=10, verbose=1)
+    #model.compile(loss='mean_squared_error', optimizer='sgd')
+    model.compile(loss='mse', optimizer='rmsprop')
+    history = model.fit_generator(gen.generar(), steps_per_epoch=20, epochs=100, verbose=1)
+    model.save_weights('domino.hdf5')
     graficar(history)
 
 def graficar(history):
@@ -101,5 +103,5 @@ def graficar(history):
 
 if __name__ == "__main__":
     
-    entrenar()
-    
+    entrenar(modelo())
+

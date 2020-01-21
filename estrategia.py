@@ -11,11 +11,7 @@ class Estrategia:
     def __init__(self, model):
         self. model = model
 
-    def elegir(self, jugador, opciones, turno):
-        ''' Elegir la mejor opcion para este jugador según el modelo '''
-        if len(opciones) == 1:
-            return opciones[0]
-
+    def evaluar(self, jugador, opciones, turno):
         values = np.empty((len(opciones),), dtype='float32')
         for i, (lado, index) in enumerate(opciones):
             ficha = jugador.ficha(index)
@@ -24,7 +20,13 @@ class Estrategia:
             x =  nj.jugado.reshape((1, IMG_ITEMS))
             y = self.model.predict(x)
             values[i] = y
+        return values        
 
-        return opciones[np.argmin(values)]
+    def elegir(self, jugador, opciones, turno):
+        ''' Elegir la mejor opcion para este jugador según el modelo '''
+        if len(opciones) == 1:
+            return opciones[0]
+
+        return opciones[np.argmin(self.evaluar(jugador, opciones, turno))]
 
         
