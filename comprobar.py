@@ -25,12 +25,13 @@ class verificador:
             print('ValoresQ: ', values)
             return opciones[np.argmin(values)]
         else:
+            values = self.policy.evaluar(jugador, opciones, turno)
             print('HUMANO {} ---------------------------------'.format(jugador.turno))
             print('Mesa ...: ' + mesa)
             print('Fichas..: ', jugador.fichas)
             for i, (lado, index) in enumerate(opciones):
                 ficha = jugador.ficha(index)
-                print('Opcion {}: {} {}'.format(i, lado, ficha))
+                print('Opcion {}: {} {} ({})'.format(i, lado, ficha, values[i]))
 
             opcion = int(input('Opcion elegida: '))
             return opciones[opcion]
