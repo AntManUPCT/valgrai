@@ -23,7 +23,7 @@ class verificador:
                 print('({}/{} {}), '.format(i, lado, ficha), end='')
             print('')
             print('ValoresQ: ', values)
-            return opciones[np.argmin(values)]
+            return opciones[np.argmax(values)]
         else:
             values = self.policy.evaluar(jugador, opciones, turno)
             print('HUMANO {} ---------------------------------'.format(jugador.turno))

@@ -8,20 +8,7 @@ import random
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
-#from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
-
-def explog(x):
-    return (np.exp(x) - 1)*(x <= 0) + np.log(x + 1)*(x > 0)
-
-def loglog(x):
-    return -np.log(1 - x)*(x <= 0) + np.log(x + 1)*(x > 0)
-
-def expexp(x):
-    return (np.exp(x) - 1)*(x <= 0) + (1 - np.exp(-x)*(x > 0))
-
-def loglin(x):
-    return -np.log(1 - x)*(x <= 0) + x*(x > 0)
 
 # La funcion choice() seleccionará una accion usando el modelo provisional
 # La funcion puntuar() entrenara el modelo con las recompensas obtenidas
@@ -49,8 +36,9 @@ class generador:
 
     def recompensa(self, state, puntos):
         indx = state.turno % domino.JUGADORES # Indice del jugador segun su turno
+        ganador = np.argmin(puntos)
         self.x_train[self.indx, :] = state.jugadores[indx].jugado.reshape((IMG_ITEMS,))
-        self.y_train[self.indx, :] = puntos[indx]
+        self.y_train[self.indx, :] = 1.0 if indx == ganador else 0.0
         self.indx = (self.indx + 1) % self.maxsize # Indice en el buffer circular
         self.dc += 1 # data counter
 
@@ -86,7 +74,7 @@ def entrenar(model):
     gen = generador(model, 10000, 0.95)
     #model.compile(loss='mean_squared_error', optimizer='sgd')
     model.compile(loss='mse', optimizer='rmsprop')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=20, epochs=100, verbose=1)
+    history = model.fit_generator(gen.generar(), steps_per_epoch=20, epochs=150, verbose=1)
     model.save_weights('domino.hdf5')
     graficar(history)
 

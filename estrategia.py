@@ -27,6 +27,4 @@ class Estrategia:
         if len(opciones) == 1:
             return opciones[0]
 
-        return opciones[np.argmin(self.evaluar(jugador, opciones, turno))]
-
-        
+        return opciones[np.argmax(self.evaluar(jugador, opciones, turno))]

@@ -50,6 +50,10 @@ class Jugador:
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
+        # Replicar las fichas puestas en el turno anterior
+        #if turno > 0:
+        #    jugado[turno, :MLEN] = jugado[turno - 1, :MLEN]
+
         # Si muevo yo quitar la ficha puesta
         if self.turno == (turno % JUGADORES):
             fichas.pop(indx)
@@ -72,6 +76,11 @@ class Jugador:
     def pasar(self, turno):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
+
+        # Replicar las fichas puestas en el turno anterior
+        #if turno > 0:
+        #    jugado[turno, :MLEN] = jugado[turno - 1, :MLEN]
+
         jugado[turno, JUGADO] = 1.0
 
         # Pintar las que me quedan
