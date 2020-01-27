@@ -4,26 +4,30 @@ from jugador import Jugador
 from estado import Estado
 
 class domino_cb:
-    def __init__(self, elegir, puntos):
+    def __init__(self, elegir, puntos, inicio, final):
         self.elegir = elegir
         self.puntos = puntos
+        self.inicio = inicio
+        self.final = final
 
 def play(state, cb, gamma=1.0):
     '''Devuelve una lista de puntos conseguidos'''
     if state.pasan==4:
         puntos = state.puntos()
+        cb.final(puntos)
         # El callback es para notificar el estado y la recompensa
         cb.puntos(state, puntos)
         return puntos
 
     opciones = state.opciones()
     if len(opciones) > 0:
-        jugada = cb.elegir(state.mesa, state.jugador(), opciones, state.turno)
-        
+        jugada = cb.elegir(state.mesa, state.jugador(), opciones, state.jugada)
+
         new_state = state.jugar(jugada)
 
         if new_state.fin_partida():
             puntos = new_state.puntos()
+            cb.final(puntos)
             cb.puntos(new_state, puntos)
             return puntos
 
@@ -36,26 +40,28 @@ def play(state, cb, gamma=1.0):
     cb.puntos(state, puntos)
     return puntos
 
-def play_game(gamma = 1.0):
-    
-    cb = domino_cb(
-        lambda mesa, jugadr, opciones, turno: opciones[0],
-        lambda state, puntos: print(state.mesa, puntos)
-        )
-
+def domino(cb, gamma = 1.0):
+    ''' Inicia el juego de una nueva partida de domino '''
     mezcla = shuffle()
     j1 = Jugador(0, take(mezcla, 7))
     j2 = Jugador(1, take(mezcla, 7))
     j3 = Jugador(2, take(mezcla, 7))
     j4 = Jugador(3, take(mezcla, 7))
 
-    print(j1.fichas)
-    print(j2.fichas)
-    print(j3.fichas)
-    print(j4.fichas)
+    juegan = [j1, j2, j3,j4]
+    sale = next(j.turno for j in juegan if j.sale())
+    cb.inicio(sale)
 
-    state = Estado([j1, j2, j3,j4])
-    print("Puntos antes:", state.puntos())
-    
+    state = Estado(jugadores=juegan, juega=sale)
+
     puntos = play(state, cb, gamma)
-    print("Puntos despues: ", puntos)
+
+if __name__ == "__main__":
+    cb = domino_cb(
+        lambda mesa, jugadr, opciones, turno: opciones[0],
+        lambda state, puntos: print(state.mesa, puntos),
+        lambda sale: print('Sale: ', sale),
+        lambda puntos: print(puntos)
+        )
+
+    domino(cb)

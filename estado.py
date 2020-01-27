@@ -16,18 +16,18 @@ class Estado:
     jugadores en las jugadas anteriores
     '''
 
-    def __init__(self, jugadores, turno=0, pasan=0, mesa=''):
-        self.jugadores = jugadores
-        self.turno = turno
-        self.pasan = pasan
-        self.mesa = mesa
+    def __init__(self, jugadores, jugada=0, pasan=0, mesa='', juega=0):
+        self.jugadores = jugadores # Lista de los 4 jugadores
+        self.jugada = jugada # Siempre incrementa, cuenta las fichas jugadas
+        self.pasan = pasan   # Cuenta los jugadores que han pasado
+        self.mesa = mesa     # Cadena de caracteres con las fichas sobre la mesa
+        self.juega = juega   # Indice de a quien le toca jugar (contador modulo 4)
 
     def __repr__(self):
-        return 'Estado(\n' + '\n'.join(map(str, self.jugadores)) + ',\n' + str(self.turno) + ',\n' + str(self.pasan) + ',\n"' + self.mesa + '")'
+        return 'Estado(\n' + '\n'.join(map(str, self.jugadores)) + ',\n' + str(self.jugada) + ',\n' + str(self.pasan) + ',\n"' + self.mesa + '")'
 
     def jugador(self):
-        indx = self.turno % JUGADORES
-        return self.jugadores[indx]
+        return self.jugadores[self.juega]
 
     def puntos(self):
         return np.array([j.puntos() for j in self.jugadores], dtype='float32')
@@ -40,14 +40,16 @@ class Estado:
         lado, indx = jugada
         ficha = self.jugador().ficha(indx)
 
-        jugadores = [j.jugar(lado, ficha, self.turno, indx) for j in self.jugadores]
+        jugadores = [j.jugar(lado, ficha, self.jugada, indx, self.juega) for j in self.jugadores]
         mesa = poner_ficha(self.mesa, lado, ficha)
-        return Estado(jugadores, self.turno + 1, 0, mesa)
+        siguiente = (self.juega + 1) % JUGADORES
+        return Estado(jugadores, self.jugada + 1, 0, mesa, siguiente)
 
     def pasar(self):
         ''' Devolver el nuevo estado '''
-        jugadores = [j.pasar(self.turno) for j in self.jugadores]
-        return Estado(jugadores, self.turno + 1, self.pasan + 1, self.mesa)
+        jugadores = [j.pasar(self.jugada) for j in self.jugadores]
+        siguiente = (self.juega + 1) % JUGADORES
+        return Estado(jugadores, self.jugada + 1, self.pasan + 1, self.mesa, siguiente)
 
     def fin_partida(self):
         return any(map(lambda j: j.fin(), self.jugadores))

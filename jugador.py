@@ -20,12 +20,15 @@ class Jugador:
     
     def __init__(self, turno, fichas, jugado = np.zeros((IMG_ALTO, IMG_ANCHO), dtype='float32')):
         self.fichas = fichas
-        self.turno = turno % JUGADORES
+        self.turno = turno
         self.jugado = jugado
 
     def __repr__(self):
         jugado = '\n'.join([''.join(map(lambda x: ' ' if x == 0.0 else '*', f)) for f in self.jugado])
         return 'Jugador('+str(self.turno) + ',\n' + str(self.fichas) + ',\n' + jugado+')'
+
+    def sale(self):
+        return "66" in self.fichas
 
     def ficha(self, indx):
         return self.fichas[indx]
@@ -35,7 +38,10 @@ class Jugador:
 
     def opciones(self, mesa):
         if len(mesa) == 0:
-            return [('F', i) for i in range(len(self.fichas))]
+            #return [('F', i) for i in range(len(self.fichas))]
+            # Empezar colocando el 6·6
+            i = self.fichas.index('66')
+            return [('F', i)]
 
         result=[]
         for i in range(len(self.fichas)):
@@ -46,47 +52,47 @@ class Jugador:
                 result.append(('L', i))
         return result
 
-    def jugar(self, lado, ficha, turno, indx):
+    def jugar(self, lado, ficha, jugada, indx, turno):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
         # Replicar las fichas puestas en el turno anterior
         #if turno > 0:
-        #    jugado[turno, :MLEN] = jugado[turno - 1, :MLEN]
+        #    jugado[jugada, :MLEN] = jugado[jugada - 1, :MLEN]
 
-        # Si muevo yo quitar la ficha puesta
-        if self.turno == (turno % JUGADORES):
+        # Si muevo yo quitarme la ficha puesta
+        if self.turno == turno:
             fichas.pop(indx)
 
         code = CODG[ficha]
-        jugado[turno, code] = 1.0
+        jugado[jugada, code] = 1.0
         if lado == 'F':
-            jugado[turno, LADO_F] = 1.0
+            jugado[jugada, LADO_F] = 1.0
         elif lado == 'L':
-            jugado[turno, LADO_L] = 1.0
-        jugado[turno, JUGADO] = 1.0
+            jugado[jugada, LADO_L] = 1.0
+        jugado[jugada, JUGADO] = 1.0
 
         # Pintar las que me quedan
         for ficha in fichas:
             code = CODG[ficha]
-            jugado[turno, MLEN + code] = 1.0
+            jugado[jugada, MLEN + code] = 1.0
 
         return Jugador(self.turno, fichas, jugado)
 
-    def pasar(self, turno):
+    def pasar(self, jugada):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
         # Replicar las fichas puestas en el turno anterior
         #if turno > 0:
-        #    jugado[turno, :MLEN] = jugado[turno - 1, :MLEN]
+        #    jugado[jugada, :MLEN] = jugado[jugada - 1, :MLEN]
 
-        jugado[turno, JUGADO] = 1.0
+        jugado[jugada, JUGADO] = 1.0
 
         # Pintar las que me quedan
         for ficha in self.fichas:
             code = CODG[ficha]
-            jugado[turno, MLEN + code] = 1.0
+            jugado[jugada, MLEN + code] = 1.0
         
         return Jugador(self.turno, fichas, jugado)
 
