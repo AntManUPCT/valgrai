@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import domino
 import juego
-from jugador import IMG_ITEMS
+from jugador import FEATURES
 import estrategia
 
 import random
@@ -23,7 +23,7 @@ class generador:
         self.parejas = parejas
         self.maxsize = 4*bs
         self.offset = 0
-        self.x_train = np.zeros((self.maxsize, IMG_ITEMS), dtype='float32')
+        self.x_train = np.zeros((self.maxsize, FEATURES), dtype='float32')
         self.y_train = np.zeros((self.maxsize, 1), dtype='float32')
         self.indx = 0
         self.dc = 0
@@ -47,7 +47,7 @@ class generador:
             gana2 = (gana1 + 2) % domino.JUGADORES
             y = 1.0 if juega == gana1 or juega == gana2 else 0.0
 
-        self.x_train[self.indx, :] = state.jugadores[juega].jugado.reshape((IMG_ITEMS,))
+        self.x_train[self.indx, :] = state.jugadores[juega].jugado
         self.y_train[self.indx, :] = y
         self.indx = (self.indx + 1) % self.maxsize # Indice en el buffer circular
         self.dc += 1 # data counter
@@ -70,17 +70,19 @@ class generador:
 def modelo():
     # Modelo basado en red Perceptron Multi Capa
     model = Sequential()
-    model.add(Dense(64, activation='relu', input_shape=(IMG_ITEMS,)))
-    model.add(Dense(32, activation='relu'))
+    model.add(Dense(200, activation='relu', input_shape=(FEATURES,)))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dense(20, activation='relu'))
     model.add(Dense(1))
-    print(model.summary(90))
+    print(model.summary(80))
     return model
 
 def entrenar(model):
-    gen = generador(model, 10000, 0.95) #, True)
+    gen = generador(model, 1000, 0.95) #, True)
     #model.compile(loss='mean_squared_error', optimizer='sgd')
     model.compile(loss='mse', optimizer='rmsprop')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=20, verbose=1)
+    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=80, verbose=1)
     model.save_weights('domino.hdf5')
     graficar(history)
 

@@ -47,7 +47,7 @@ class verificador:
         print('Ganador:', np.argmin(puntos))
 
     def funcion_Q(self):
-        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.finpartida)
+        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.inipartida, self.finpartida)
         juego.domino(cb)
         
 

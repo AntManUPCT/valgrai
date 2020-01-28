@@ -6,26 +6,32 @@ Created on Mon Jan 13 10:32:50 2020
 @author: manuel
 """
 
-from domino import MLEN, JUGADORES, CODG, score_fichas, try_first, try_last
+from domino import MLEN, JUGADORES, score_fichas, try_first, try_last
 import numpy as np
 
-IMG_ALTO = 50
-IMG_ANCHO = MLEN + MLEN + 3
-IMG_ITEMS = IMG_ALTO*IMG_ANCHO
-LADO_F = MLEN + MLEN
-LADO_L = LADO_F + 1
-JUGADO = LADO_L + 1
+FEATURES = 4 + 7 + 7
+JUGADAS = 0
+EN_MESA  = JUGADAS + 4
+ME_QUEDA = EN_MESA + 7
 
 class Jugador:
     
-    def __init__(self, turno, fichas, jugado = np.zeros((IMG_ALTO, IMG_ANCHO), dtype='float32')):
+    def __init__(self, turno, fichas, jugado = None):
         self.fichas = fichas
         self.turno = turno
-        self.jugado = jugado
+        if jugado is None:
+            self.jugado = np.zeros((FEATURES,), dtype='float32')
+        else:
+            self.jugado = jugado
 
+        # Contabilizar los puntos que tengo
+        if np.sum(self.jugado) == 0.0:
+            for f in fichas:
+                self.jugado[ME_QUEDA + int(f[0])] += 1.0
+                self.jugado[ME_QUEDA + int(f[1])] += 1.0
+        
     def __repr__(self):
-        jugado = '\n'.join([''.join(map(lambda x: ' ' if x == 0.0 else '*', f)) for f in self.jugado])
-        return 'Jugador('+str(self.turno) + ',\n' + str(self.fichas) + ',\n' + jugado+')'
+        return 'Jugador('+str(self.turno) + ',\n' + str(self.fichas) + ',\n' + self.jugado + ')'
 
     def sale(self):
         return "66" in self.fichas
@@ -56,43 +62,26 @@ class Jugador:
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
-        # Replicar las fichas puestas en el turno anterior
-        #if turno > 0:
-        #    jugado[jugada, :MLEN] = jugado[jugada - 1, :MLEN]
+        jugado[turno] += 1.0
+
+        n1 = int(ficha[0])
+        n2 = int(ficha[1])
+        jugado[EN_MESA + n1] += 1.0
+        jugado[EN_MESA + n2] += 1.0
 
         # Si muevo yo quitarme la ficha puesta
         if self.turno == turno:
             fichas.pop(indx)
-
-        code = CODG[ficha]
-        jugado[jugada, code] = 1.0
-        if lado == 'F':
-            jugado[jugada, LADO_F] = 1.0
-        elif lado == 'L':
-            jugado[jugada, LADO_L] = 1.0
-        jugado[jugada, JUGADO] = 1.0
-
-        # Pintar las que me quedan
-        for ficha in fichas:
-            code = CODG[ficha]
-            jugado[jugada, MLEN + code] = 1.0
+            jugado[ME_QUEDA + n1] -= 1.0
+            jugado[ME_QUEDA + n2] -= 1.0
 
         return Jugador(self.turno, fichas, jugado)
 
-    def pasar(self, jugada):
+    def pasar(self, jugada, turno):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
-        # Replicar las fichas puestas en el turno anterior
-        #if turno > 0:
-        #    jugado[jugada, :MLEN] = jugado[jugada - 1, :MLEN]
-
-        jugado[jugada, JUGADO] = 1.0
-
-        # Pintar las que me quedan
-        for ficha in self.fichas:
-            code = CODG[ficha]
-            jugado[jugada, MLEN + code] = 1.0
+        jugado[turno] += 1
         
         return Jugador(self.turno, fichas, jugado)
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import juego
 import jugador
-from jugador import IMG_ITEMS 
+from jugador import FEATURES
 
 import numpy as np
 
@@ -17,7 +17,7 @@ class Estrategia:
             ficha = jugador.ficha(index)
             # Nuevo estado del jugador tras probar esta accion
             nj = jugador.jugar(lado, ficha, jugada, index, jugador.turno)
-            x =  nj.jugado.reshape((1, IMG_ITEMS))
+            x =  nj.jugado.reshape((1, FEATURES))
             y = self.model.predict(x)
             values[i] = y
         return values        
