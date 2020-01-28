@@ -2,6 +2,7 @@
 from domino import shuffle, take
 from jugador import Jugador
 from estado import Estado
+import random
 
 class domino_cb:
     def __init__(self, elegir, puntos, inicio, final):
@@ -49,7 +50,8 @@ def domino(cb, gamma = 1.0):
     j4 = Jugador(3, take(mezcla, 7))
 
     juegan = [j1, j2, j3,j4]
-    sale = next(j.turno for j in juegan if j.sale())
+    #sale = next(j.turno for j in juegan if j.sale())
+    sale = random.randrange(0,4)
     cb.inicio(sale)
 
     state = Estado(jugadores=juegan, juega=sale)

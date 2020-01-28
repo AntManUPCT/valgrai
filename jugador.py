@@ -29,12 +29,9 @@ class Jugador:
             for f in fichas:
                 self.jugado[ME_QUEDA + int(f[0])] += 1.0
                 self.jugado[ME_QUEDA + int(f[1])] += 1.0
-        
+
     def __repr__(self):
         return 'Jugador('+str(self.turno) + ',\n' + str(self.fichas) + ',\n' + self.jugado + ')'
-
-    def sale(self):
-        return "66" in self.fichas
 
     def ficha(self, indx):
         return self.fichas[indx]
@@ -43,12 +40,6 @@ class Jugador:
         return score_fichas(self.fichas)
 
     def opciones(self, mesa):
-        if len(mesa) == 0:
-            #return [('F', i) for i in range(len(self.fichas))]
-            # Empezar colocando el 6·6
-            i = self.fichas.index('66')
-            return [('F', i)]
-
         result=[]
         for i in range(len(self.fichas)):
             ficha = self.fichas[i]
@@ -81,8 +72,6 @@ class Jugador:
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
-        jugado[turno] += 1
-        
         return Jugador(self.turno, fichas, jugado)
 
     def fin(self):

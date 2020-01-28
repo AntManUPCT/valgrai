@@ -32,9 +32,10 @@ class comparador:
         self.salidas[sale] += 1
 
     def finpartida(self, puntos):
-        ganador = np.argmin(puntos)
-        self.contadores[ganador] += 1
-        return ganador
+        minpuntos = np.min(puntos)
+        for i,p in enumerate(puntos):
+            if p == minpuntos:
+                self.contadores[i] += 1
 
     def jugar(self):
         cb = juego.domino_cb(self.eleccion, self.puntuacion, self.inipartida, self.finpartida)
