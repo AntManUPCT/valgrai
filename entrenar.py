@@ -70,14 +70,7 @@ class generador:
 def modelo():
     # Modelo basado en red Perceptron Multi Capa
     model = Sequential()
-    model.add(Dense(100, activation='relu', input_shape=(FEATURES,)))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
+    model.add(Dense(500, activation='relu', input_shape=(FEATURES,)))
     model.add(Dense(100, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     print(model.summary(80))
@@ -85,9 +78,11 @@ def modelo():
 
 def entrenar(model):
     gen = generador(model, 5000, 0.95) #, True)
-    #model.compile(loss='mean_squared_error', optimizer='sgd')
-    model.compile(loss='mse', optimizer='rmsprop')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=100, verbose=1)
+    #model.compile(loss='mse', optimizer='sgd')
+    #model.compile(loss='mse', optimizer='rmsprop')
+    model.compile(loss='mse', optimizer='adam')
+    #model.compile(loss='mse', optimizer='adadelta')
+    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=80, verbose=1)
     model.save_weights('domino.hdf5')
     graficar(history)
 
