@@ -30,6 +30,8 @@ def play(state, cb, gamma=1.0):
             puntos = new_state.puntos()
             cb.final(puntos)
             cb.puntos(new_state, puntos)
+            puntos *= gamma
+            cb.puntos(state, puntos)
             return puntos
 
         puntos = play(new_state, cb, gamma) * gamma
