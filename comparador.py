@@ -3,6 +3,7 @@
 import juego
 import entrenar
 import estrategia
+from domino import score_ficha
 
 import numpy as np
 import random
@@ -16,13 +17,20 @@ class comparador:
 
     def eleccion(self, mesa, jugador, opciones, jugada):
         # Ordenador contra tres jugadores aleatorios
-        if jugador.turno == 3:
+        if jugador.turno == 0:
+            return random.choice(opciones)
+        
+        elif jugador.turno == 1:
+            return random.choice(opciones)
+        
+        elif jugador.turno == 2:
+            values = list(map(lambda opcion: score_ficha(jugador.ficha(opcion[1])), opciones))
+            return opciones[np.argmax(values)]
+                          
+        elif jugador.turno == 3:
             # ORDENADOR
             values = self.policy.evaluar(jugador, opciones, jugada)
             return opciones[np.argmax(values)]
-        else:
-            # ALEATORIO
-            return random.choice(opciones)
 
     def puntuacion(self, state, puntos):
         #print('Puntos: ', puntos, 'Mesa: ', state.mesa)
