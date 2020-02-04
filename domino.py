@@ -11,6 +11,8 @@ import random
 MAZO=[str(a)+str(b) for a in range(7) for b in range(a, 7)]
 MLEN=len(MAZO)
 
+CODG={f:i for i, f in enumerate(MAZO)}
+
 def swap(ficha):
     return ficha[1] + ficha[0]
 

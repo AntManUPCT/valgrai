@@ -9,6 +9,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 import matplotlib.pyplot as plt
+import os.path
 
 # La funcion choice() seleccionará una accion usando el modelo provisional
 # La funcion puntuar() entrenara el modelo con las recompensas obtenidas
@@ -47,7 +48,7 @@ class generador:
             gana2 = (gana1 + 2) % domino.JUGADORES
             y = 1.0 if juega == gana1 or juega == gana2 else 0.0
 
-        self.x_train[self.indx, :] = state.jugadores[juega].jugado
+        self.x_train[self.indx, :] = state.jugadores[juega].jugado.reshape((FEATURES,))
         self.y_train[self.indx, :] = y
         self.indx = (self.indx + 1) % self.maxsize # Indice en el buffer circular
         self.dc += 1 # data counter
@@ -74,6 +75,9 @@ def modelo():
     model.add(Dense(100, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     print(model.summary(80))
+    if os.path.exists('domino.hdf5'):
+        model.load_weights('domino.hdf5')
+
     return model
 
 def entrenar(model):

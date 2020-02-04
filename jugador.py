@@ -6,13 +6,13 @@ Created on Mon Jan 13 10:32:50 2020
 @author: manuel
 """
 
-from domino import MLEN, JUGADORES, score_fichas, try_first, try_last
+from domino import MLEN, CODG, JUGADORES, score_fichas, try_first, try_last
 import numpy as np
 
-FEATURES = 4 + 7 + 7
-JUGADAS = 0
-EN_MESA  = JUGADAS + 4
-ME_QUEDA = EN_MESA + 7
+FILAS = MLEN
+COLAS = JUGADORES + 1
+FEATURES = FILAS * COLAS
+ME_QUEDA = JUGADORES
 
 class Jugador:
     
@@ -20,15 +20,11 @@ class Jugador:
         self.fichas = fichas
         self.turno = turno
         if jugado is None:
-            self.jugado = np.zeros((FEATURES,), dtype='float32')
+            self.jugado = np.zeros((FILAS, COLAS), dtype='float32')
+            for f in fichas:
+                self.jugado[CODG[f], ME_QUEDA] = 1.0
         else:
             self.jugado = jugado
-
-        # Contabilizar los puntos que tengo
-        if np.sum(self.jugado) == 0.0:
-            for f in fichas:
-                self.jugado[ME_QUEDA + int(f[0])] += 1.0
-                self.jugado[ME_QUEDA + int(f[1])] += 1.0
 
     def __repr__(self):
         return 'Jugador('+str(self.turno) + ',\n' + str(self.fichas) + ',\n' + self.jugado + ')'
@@ -53,18 +49,13 @@ class Jugador:
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
-        jugado[turno] += 1.0
-
-        n1 = int(ficha[0])
-        n2 = int(ficha[1])
-        jugado[EN_MESA + n1] += 1.0
-        jugado[EN_MESA + n2] += 1.0
+        fila = CODG[ficha]
+        jugado[fila, turno] = 1.0
 
         # Si muevo yo quitarme la ficha puesta
         if self.turno == turno:
-            fichas.pop(indx)
-            jugado[ME_QUEDA + n1] -= 1.0
-            jugado[ME_QUEDA + n2] -= 1.0
+            jugado[fila, ME_QUEDA] = 0.0
+            fichas.pop(indx) # quitarla de la nueva copia
 
         return Jugador(self.turno, fichas, jugado)
 
