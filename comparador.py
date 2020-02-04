@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # Crear el verificador del modelo
     comp = comparador(model)
 
-    # Jugar contra tres jugadores aleatorios
+    # Jugar contra otros tres jugadores
     for i in range(10000):
         comp.jugar()
         if i % 1000 == 0:
@@ -67,3 +67,6 @@ if __name__ == '__main__':
 
     print('Ganadas: ', comp.contadores)
     print('Salidas: ', comp.salidas)
+    suma = sum(comp.contadores)
+    ratios = np.round(np.array(comp.contadores) * 100.0 / suma, 1)
+    print('Ratios.: ', ratios)
