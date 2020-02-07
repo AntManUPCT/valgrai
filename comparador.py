@@ -13,7 +13,6 @@ class comparador:
     def __init__(self, model):
         self.policy = estrategia.Estrategia(model)
         self.contadores = np.zeros((4,), dtype='int32')
-        self.salidas = np.zeros((4,), dtype='int32')
 
     def eleccion(self, mesa, jugador, opciones, jugada):
         # Ordenador contra tres jugadores aleatorios
@@ -36,9 +35,6 @@ class comparador:
         #print('Puntos: ', puntos, 'Mesa: ', state.mesa)
         pass
 
-    def inipartida(self, sale):
-        self.salidas[sale] += 1
-
     def finpartida(self, puntos):
         minpuntos = np.min(puntos)
         for i,p in enumerate(puntos):
@@ -46,7 +42,7 @@ class comparador:
                 self.contadores[i] += 1
 
     def jugar(self):
-        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.inipartida, self.finpartida)
+        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.finpartida)
         juego.domino(cb)
 
 
@@ -66,7 +62,6 @@ if __name__ == '__main__':
             print(i, comp.contadores, end='\r')
 
     print('Ganadas: ', comp.contadores)
-    print('Salidas: ', comp.salidas)
     suma = sum(comp.contadores)
     ratios = np.round(np.array(comp.contadores) * 100.0 / suma, 1)
     print('Ratios.: ', ratios)

@@ -28,10 +28,7 @@ class generador:
         self.y_train = np.zeros((self.maxsize, 1), dtype='float32')
         self.indx = 0
         self.dc = 0
-        self.cb = juego.domino_cb(self.eleccion, self.recompensa, self.salida, self.finpartida)
-
-    def salida(self, sale):
-        pass
+        self.cb = juego.domino_cb(self.eleccion, self.recompensa, self.finpartida)
 
     def eleccion(self, mesa, jugador, opciones, jugada):
         if random.random() > 0.8:
@@ -81,12 +78,12 @@ def modelo():
     return model
 
 def entrenar(model):
-    gen = generador(model, 5000, 0.95) #, True)
+    gen = generador(model, 50000, 0.95) #, True)
     #model.compile(loss='mse', optimizer='sgd')
     #model.compile(loss='mse', optimizer='rmsprop')
     model.compile(loss='mse', optimizer='adam')
     #model.compile(loss='mse', optimizer='adadelta')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=80, verbose=1)
+    history = model.fit_generator(gen.generar(), steps_per_epoch=5, epochs=5, verbose=1)
     model.save_weights('domino.hdf5')
     graficar(history)
 

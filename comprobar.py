@@ -39,15 +39,12 @@ class verificador:
     def puntuacion(self, state, puntos):
         print('Puntos: ', puntos, 'Mesa: ', state.mesa)
 
-    def inipartida(self, sale):
-        print('Sale:' , sale)
-
     def finpartida(self, puntos):
         print('Puntos : ', puntos)
         print('Ganador:', np.argmin(puntos))
 
     def funcion_Q(self):
-        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.inipartida, self.finpartida)
+        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.finpartida)
         juego.domino(cb)
         
 

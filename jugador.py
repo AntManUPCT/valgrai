@@ -10,19 +10,20 @@ from domino import MLEN, CODG, JUGADORES, score_fichas, try_first, try_last
 import numpy as np
 
 FILAS = MLEN
-COLAS = JUGADORES + 1
+COLAS = 2*JUGADORES
 FEATURES = FILAS * COLAS
-ME_QUEDA = JUGADORES
 
 class Jugador:
-    
+
     def __init__(self, turno, fichas, jugado = None):
         self.fichas = fichas
         self.turno = turno
         if jugado is None:
             self.jugado = np.zeros((FILAS, COLAS), dtype='float32')
             for f in fichas:
-                self.jugado[CODG[f], ME_QUEDA] = 1.0
+                for j in range(JUGADORES):
+                    self.jugado[CODG[f], JUGADORES + j] = 1.0 if j == turno else -1.0
+
         else:
             self.jugado = jugado
 
@@ -36,9 +37,12 @@ class Jugador:
         return score_fichas(self.fichas)
 
     def opciones(self, mesa):
+        if len(mesa) == 0:
+            i = self.fichas.index('66')
+            return [('F', i)]
+
         result=[]
-        for i in range(len(self.fichas)):
-            ficha = self.fichas[i]
+        for i, ficha in enumerate(self.fichas):
             if try_first(ficha, mesa):
                 result.append(('F', i))
             if try_last(ficha, mesa):
@@ -50,21 +54,32 @@ class Jugador:
         jugado = self.jugado.copy()
 
         fila = CODG[ficha]
-        jugado[fila, turno] = 1.0
+        cola = (turno + JUGADORES - self.turno) % JUGADORES
+
+        jugado[fila, cola] = 1.0
+        for j in range(JUGADORES):
+            jugado[fila, JUGADORES + j] = -1.0 # Nadie tiene ya esta ficha
 
         # Si muevo yo quitarme la ficha puesta
         if self.turno == turno:
-            jugado[fila, ME_QUEDA] = 0.0
             fichas.pop(indx) # quitarla de la nueva copia
 
         return Jugador(self.turno, fichas, jugado)
 
-    def pasar(self, jugada, turno):
+    def pasar(self, jugada, turno, mesa):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
+
+        izda = mesa[0]
+        dcha = mesa[-1]
+        cola = (turno + JUGADORES - self.turno) % JUGADORES
+
+        # Marcar las fichas que no tiene el jugador que pasa
+        for ficha, fila in CODG.items():
+            if (izda in ficha) or (dcha in ficha):
+                jugado[fila, cola] = -1.0
 
         return Jugador(self.turno, fichas, jugado)
 
     def fin(self):
         return len(self.fichas) == 0
-

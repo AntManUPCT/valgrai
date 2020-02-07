@@ -47,7 +47,7 @@ class Estado:
 
     def pasar(self):
         ''' Devolver el nuevo estado '''
-        jugadores = [j.pasar(self.jugada, self.juega) for j in self.jugadores]
+        jugadores = [j.pasar(self.jugada, self.juega, self.mesa) for j in self.jugadores]
         siguiente = (self.juega + 1) % JUGADORES
         return Estado(jugadores, self.jugada + 1, self.pasan + 1, self.mesa, siguiente)
 
