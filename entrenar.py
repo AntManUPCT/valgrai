@@ -68,8 +68,10 @@ class generador:
 def modelo():
     # Modelo basado en red Perceptron Multi Capa
     model = Sequential()
-    model.add(Dense(800, activation='relu', input_shape=(FEATURES,)))
-    model.add(Dense(300, activation='relu'))
+    model.add(Dense(200, activation='relu', input_shape=(FEATURES,)))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(50, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     print(model.summary(80))
     if os.path.exists('domino.hdf5'):
@@ -78,12 +80,13 @@ def modelo():
     return model
 
 def entrenar(model):
-    gen = generador(model, 50000, 0.95) #, True)
+    gen = generador(model, 20000, 0.95) #, True)
     #model.compile(loss='mse', optimizer='sgd')
     #model.compile(loss='mse', optimizer='rmsprop')
-    model.compile(loss='mse', optimizer='adam')
+    #model.compile(loss='mse', optimizer='adam')
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop')
     #model.compile(loss='mse', optimizer='adadelta')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=5, epochs=5, verbose=1)
+    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=10, verbose=1)
     model.save_weights('domino.hdf5')
     graficar(history)
 

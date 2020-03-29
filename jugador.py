@@ -13,6 +13,24 @@ FILAS = MLEN
 COLAS = 2*JUGADORES
 FEATURES = FILAS * COLAS
 
+"""
+El estado de cada jugador esta compuesto por:
+  1. Bloque de fichas puestas por cada jugador.
+     Cada columan es para un jugador (yo, siguiente, siguiente, siguiente)
+     Cada fila es para una ficha (0-27)
+  2. Bloque con las fichas que NO tiene ese jugador
+
+Al principio:
+  Yo solo tengo las mias y no tengo las demás.
+  Los demas no tienen mis fichas y no se sabe nada de las que tienen
+
+En cada jugada:
+  Los otros no tienen las fichas que se van poniendo
+  Si uno pasa, ese no tiene ninguna de las fichas con las que pasa
+
+
+"""
+
 class Jugador:
 
     def __init__(self, turno, fichas, jugado = None):
@@ -20,9 +38,11 @@ class Jugador:
         self.turno = turno
         if jugado is None:
             self.jugado = np.zeros((FILAS, COLAS), dtype='float32')
+            # fijar mis fichas y que no tienen los otros jugadores
             for f in fichas:
+                fila = CODG[f]
                 for j in range(JUGADORES):
-                    self.jugado[CODG[f], JUGADORES + j] = 1.0 if j == turno else -1.0
+                    self.jugado[fila, JUGADORES + j] = 1.0 if j == 0 else -1.0
 
         else:
             self.jugado = jugado
@@ -56,7 +76,7 @@ class Jugador:
         fila = CODG[ficha]
         cola = (turno + JUGADORES - self.turno) % JUGADORES
 
-        jugado[fila, cola] = 1.0
+        jugado[fila, cola] = 1.0 # Ficha puesta en la mesa
         for j in range(JUGADORES):
             jugado[fila, JUGADORES + j] = -1.0 # Nadie tiene ya esta ficha
 
@@ -77,7 +97,7 @@ class Jugador:
         # Marcar las fichas que no tiene el jugador que pasa
         for ficha, fila in CODG.items():
             if (izda in ficha) or (dcha in ficha):
-                jugado[fila, cola] = -1.0
+                jugado[fila, JUGADORES + cola] = -1.0
 
         return Jugador(self.turno, fichas, jugado)
 

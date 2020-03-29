@@ -1,1 +1,1 @@
-__all__ = ["juego_v2", "entrenar"]
+__all__ = ["juego", "entrenar"]
