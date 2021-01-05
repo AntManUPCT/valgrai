@@ -6,11 +6,11 @@ Created on Mon Jan 13 10:32:50 2020
 @author: manuel
 """
 
-from domino import MLEN, CODG, JUGADORES, score_fichas, try_first, try_last
+from domino import MLEN, CODG, JUGADORES, codes, score_fichas, try_first, try_last
 import numpy as np
 
 FILAS = MLEN
-COLAS = 2*JUGADORES
+COLAS = 2 * JUGADORES
 FEATURES = FILAS * COLAS
 
 """
@@ -31,9 +31,10 @@ En cada jugada:
 
 """
 
+
 class Jugador:
 
-    def __init__(self, turno, fichas, jugado = None):
+    def __init__(self, turno, fichas, jugado=None):
         self.fichas = fichas
         self.turno = turno
         if jugado is None:
@@ -48,41 +49,37 @@ class Jugador:
             self.jugado = jugado
 
     def __repr__(self):
-        return 'Jugador('+str(self.turno) + ',\n' + str(self.fichas) + ',\n' + self.jugado + ')'
-
-    def ficha(self, indx):
-        return self.fichas[indx]
+        return 'Jugador(' + str(self.turno) + ',\n' + str(self.fichas) + ',\n' + self.jugado + ')'
 
     def puntos(self):
         return score_fichas(self.fichas)
 
     def opciones(self, mesa):
         if len(mesa) == 0:
-            i = self.fichas.index('66')
-            return [('F', i)]
+            return [('F', i) for i in codes(self.fichas)]
 
-        result=[]
-        for i, ficha in enumerate(self.fichas):
+        result = []
+        for ficha in self.fichas:
             if try_first(ficha, mesa):
-                result.append(('F', i))
+                result.append(('F', CODG[ficha]))
             if try_last(ficha, mesa):
-                result.append(('L', i))
+                result.append(('L', CODG[ficha]))
         return result
 
-    def jugar(self, lado, ficha, jugada, indx, turno):
+    def jugar(self, lado, ficha, jugada, turno):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
         fila = CODG[ficha]
         cola = (turno + JUGADORES - self.turno) % JUGADORES
 
-        jugado[fila, cola] = 1.0 # Ficha puesta en la mesa
+        jugado[fila, cola] = 1.0  # Ficha puesta en la mesa
         for j in range(JUGADORES):
-            jugado[fila, JUGADORES + j] = -1.0 # Nadie tiene ya esta ficha
+            jugado[fila, JUGADORES + j] = -1.0  # Nadie tiene ya esta ficha
 
         # Si muevo yo quitarme la ficha puesta
         if self.turno == turno:
-            fichas.pop(indx) # quitarla de la nueva copia
+            fichas.remove(ficha)  # quitarla de la nueva copia
 
         return Jugador(self.turno, fichas, jugado)
 

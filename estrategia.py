@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from domino import MAZO
 import juego
 import jugador
 from jugador import FEATURES
@@ -14,9 +15,8 @@ class Estrategia:
     def evaluar(self, jugador, opciones, jugada):
         values = np.empty((len(opciones),), dtype='float32')
         for i, (lado, index) in enumerate(opciones):
-            ficha = jugador.ficha(index)
             # Nuevo estado del jugador tras probar esta accion
-            nj = jugador.jugar(lado, ficha, jugada, index, jugador.turno)
+            nj = jugador.jugar(lado, MAZO[index], jugada, jugador.turno)
             x =  nj.jugado.reshape((1, FEATURES))
             y = self.model.predict(x)
             values[i] = y

@@ -6,7 +6,7 @@ Created on Mon Jan 13 10:36:35 2020
 @author: manuel
 """
 
-from domino import JUGADORES, poner_ficha
+from domino import MAZO, JUGADORES, poner_ficha
 import numpy as np
 
 class Estado:
@@ -38,9 +38,9 @@ class Estado:
     def jugar(self, jugada):
         ''' Devolver el nuevo estado '''
         lado, indx = jugada
-        ficha = self.jugador().ficha(indx)
+        ficha = MAZO[indx]
 
-        jugadores = [j.jugar(lado, ficha, self.jugada, indx, self.juega) for j in self.jugadores]
+        jugadores = [j.jugar(lado, ficha, self.jugada, self.juega) for j in self.jugadores]
         mesa = poner_ficha(self.mesa, lado, ficha)
         siguiente = (self.juega + 1) % JUGADORES
         return Estado(jugadores, self.jugada + 1, 0, mesa, siguiente)
