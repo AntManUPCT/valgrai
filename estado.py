@@ -3,11 +3,12 @@
 """
 Created on Mon Jan 13 10:36:35 2020
 
-@author: manuel
+@author: antonio manuel
 """
 
-from domino import MAZO, JUGADORES, poner_ficha
+from domino import JUGADORES, poner_ficha, played
 import numpy as np
+
 
 class Estado:
     '''
@@ -17,11 +18,11 @@ class Estado:
     '''
 
     def __init__(self, jugadores, jugada=0, pasan=0, mesa='', juega=0):
-        self.jugadores = jugadores # Lista de los 4 jugadores
-        self.jugada = jugada # Siempre incrementa, cuenta las fichas jugadas
-        self.pasan = pasan   # Cuenta los jugadores que han pasado
-        self.mesa = mesa     # Cadena de caracteres con las fichas sobre la mesa
-        self.juega = juega   # Indice de a quien le toca jugar (contador modulo 4)
+        self.jugadores = jugadores  # Lista de los 4 jugadores
+        self.jugada = jugada        # Siempre incrementa, cuenta las fichas jugadas
+        self.pasan = pasan          # Cuenta los jugadores que han pasado
+        self.mesa = mesa            # Cadena de caracteres con las fichas sobre la mesa
+        self.juega = juega          # Indice de a quien le toca jugar (contador modulo 4)
 
     def __repr__(self):
         return 'Estado(\n' + '\n'.join(map(str, self.jugadores)) + ',\n' + str(self.jugada) + ',\n' + str(self.pasan) + ',\n"' + self.mesa + '")'
@@ -37,9 +38,7 @@ class Estado:
 
     def jugar(self, jugada):
         ''' Devolver el nuevo estado '''
-        lado, indx = jugada
-        ficha = MAZO[indx]
-
+        lado, ficha = played(jugada)
         jugadores = [j.jugar(lado, ficha, self.jugada, self.juega) for j in self.jugadores]
         mesa = poner_ficha(self.mesa, lado, ficha)
         siguiente = (self.juega + 1) % JUGADORES
@@ -53,3 +52,6 @@ class Estado:
 
     def fin_partida(self):
         return any(map(lambda j: j.fin(), self.jugadores))
+
+    def todos_pasan(self):
+        return self.pasan == JUGADORES

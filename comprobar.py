@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from domino import MAZO
 import juego
 import entrenar
 import estrategia
-
 import numpy as np
+
 
 class verificador:
 
@@ -16,11 +17,10 @@ class verificador:
         if jugador.turno == 0:
             values = self.policy.evaluar(jugador, opciones, turno)
             print('ORDENADOR --------------------------------')
-            print('Mesa ...: ' + mesa) 
-            print('Opciones: [', end='') 
+            print('Mesa ...: ' + mesa)
+            print('Opciones: [', end='')
             for i, (lado, index) in enumerate(opciones):
-                ficha = jugador.ficha(index)
-                print('({}/{} {}), '.format(i, lado, ficha), end='')
+                print('({}/{} {}), '.format(i, lado, MAZO[index]), end='')
             print('')
             print('ValoresQ: ', values)
             return opciones[np.argmax(values)]
@@ -30,8 +30,7 @@ class verificador:
             print('Mesa ...: ' + mesa)
             print('Fichas..: ', jugador.fichas)
             for i, (lado, index) in enumerate(opciones):
-                ficha = jugador.ficha(index)
-                print('Opcion {}: {} {} ({})'.format(i, lado, ficha, values[i]))
+                print('Opcion {}: {} {} ({})'.format(i, lado, MAZO[index], values[i]))
 
             opcion = int(input('Opcion elegida: '))
             return opciones[opcion]
@@ -44,9 +43,15 @@ class verificador:
         print('Ganador:', np.argmin(puntos))
 
     def funcion_Q(self):
-        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.finpartida)
+        cb = juego.domino_cb(
+            self.eleccion,
+            self.puntuacion,
+            self.finpartida,
+            lambda state, jugada: None,
+            lambda state: None
+        )
         juego.domino(cb)
-        
+
 
 if __name__ == '__main__':
 
@@ -59,4 +64,4 @@ if __name__ == '__main__':
 
     # Mostrar la evaluacion del la funcion Q tras el entrenamiento
     verif.funcion_Q()
-    
+

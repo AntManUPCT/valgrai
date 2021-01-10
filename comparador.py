@@ -3,10 +3,11 @@
 import juego
 import entrenar
 import estrategia
-from domino import score_ficha
+from domino import PUNTOS
 
 import numpy as np
 import random
+
 
 class comparador:
 
@@ -17,32 +18,37 @@ class comparador:
     def eleccion(self, mesa, jugador, opciones, jugada):
         # Ordenador contra tres jugadores aleatorios
         if jugador.turno == 0:
+            # Elige una ficha aleatoria
             return random.choice(opciones)
-        
+
         elif jugador.turno == 1:
+            # Elige una ficha aleatoria
             return random.choice(opciones)
-        
+
         elif jugador.turno == 2:
-            values = list(map(lambda opcion: score_ficha(jugador.ficha(opcion[1])), opciones))
+            # Elige la ficha de mayor puntuacion
+            values = [PUNTOS[f] for l, f in opciones]
             return opciones[np.argmax(values)]
-                          
+
         elif jugador.turno == 3:
             # ORDENADOR
             values = self.policy.evaluar(jugador, opciones, jugada)
             return opciones[np.argmax(values)]
 
-    def puntuacion(self, state, puntos):
-        #print('Puntos: ', puntos, 'Mesa: ', state.mesa)
-        pass
-
     def finpartida(self, puntos):
         minpuntos = np.min(puntos)
-        for i,p in enumerate(puntos):
+        for i, p in enumerate(puntos):
             if p == minpuntos:
                 self.contadores[i] += 1
 
     def jugar(self):
-        cb = juego.domino_cb(self.eleccion, self.puntuacion, self.finpartida)
+        cb = juego.domino_cb(
+            self.eleccion,
+            lambda state, puntos: None,
+            self.finpartida,
+            lambda state, jugada: None,
+            lambda state: None
+        )
         juego.domino(cb)
 
 
@@ -56,7 +62,7 @@ if __name__ == '__main__':
     comp = comparador(model)
 
     # Jugar contra otros tres jugadores
-    for i in range(10000):
+    for i in range(100000):
         comp.jugar()
         if i % 1000 == 0:
             print(i, comp.contadores, end='\r')

@@ -1,43 +1,52 @@
 #!/usr/bin/env python3
-from domino import shuffle, take, JUGADORES
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Dec 30 10:36:35 2019
+
+@author: antonio manuel
+"""
+
+from domino import shuffle, take, played, JUGADORES
 from jugador import Jugador
 from estado import Estado
-
+from random import randint
 
 class domino_cb:
-    def __init__(self, elegir, puntos, final):
-        self.elegir = elegir
-        self.puntos = puntos
-        self.final = final
+    def __init__(self, elegir, puntos, final, jugar, pasar):
+        self.elegir = elegir  # función para elegir una ficha
+        self.puntos = puntos  # función para notificar los puntos obtenidos
+        self.final = final  # funcion para notificar el final de la partida
+        self.jugar = jugar  # funcion para notificar la ficha jugada por un jugador
+        self.pasar = pasar  # funcion para notificar que un jugador pasa en su turno
+
+
+def fin_partida(state, cb):
+    puntos = state.puntos()
+    # El callback es para notificar el estado y la recompensa
+    cb.final(puntos)          # Notificar final de la partida
+    cb.puntos(state, puntos)  # Notificar la recompensa obtenida
+    return puntos
 
 
 def play(state, cb, gamma=1.0):
     '''Devuelve una lista de puntos conseguidos'''
-    if state.pasan == 4:
-        puntos = state.puntos()
-        # El callback es para notificar el estado y la recompensa
-        cb.final(puntos)
-        return puntos
+    if state.todos_pasan():
+        return fin_partida(state, cb)
 
     opciones = state.opciones()
     if len(opciones) > 0:
         jugada = cb.elegir(state.mesa, state.jugador(), opciones, state.jugada)
 
         new_state = state.jugar(jugada)
+        cb.jugar(state, jugada)
 
         if new_state.fin_partida():
-            puntos = new_state.puntos()
-            cb.final(puntos)
-            cb.puntos(new_state, puntos)
-            puntos *= gamma
-            cb.puntos(state, puntos)
-            return puntos
+            return fin_partida(new_state, cb)
 
-        puntos = play(new_state, cb, gamma) * gamma
-        cb.puntos(state, puntos)
-        return puntos
+    else:
+        new_state = state.pasar()
+        cb.pasar(state)
 
-    new_state = state.pasar()
     puntos = play(new_state, cb, gamma) * gamma
     cb.puntos(state, puntos)
     return puntos
@@ -54,8 +63,8 @@ def domino(cb, gamma=1.0):
     j4 = Jugador(3, take(mezcla, 7))
 
     juegan = [j1, j2, j3, j4]
-
-    state = Estado(jugadores=juegan)
+    empieza = randint(0, JUGADORES - 1)
+    state = Estado(jugadores=juegan, juega=empieza)
 
     return play(state, cb, gamma)
 
@@ -63,8 +72,10 @@ def domino(cb, gamma=1.0):
 if __name__ == "__main__":
     cb = domino_cb(
         lambda mesa, jugadr, opciones, turno: opciones[0],
-        lambda state, puntos: print(state.mesa),
-        lambda puntos: print(puntos)
+        lambda state, puntos: None,
+        lambda puntos: print(puntos),
+        lambda state, jugada: print(state.jugador().turno, played(jugada)),
+        lambda state: print(state.jugador().turno, "Pasa")
     )
 
     print("Puntos: ", domino(cb))

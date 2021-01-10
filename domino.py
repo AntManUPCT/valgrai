@@ -45,6 +45,7 @@ def score_fichas(fichas):
     return sum(map(score_ficha, fichas))
 
 
+PUNTOS = list(map(score_ficha, MAZO))
 MAX_PUNTOS = score_fichas(MAZO)
 
 
@@ -81,6 +82,10 @@ def poner_ficha(mesa, lado, ficha):
         return put_first(ficha, mesa)
     elif lado == 'L':
         return put_last(ficha, mesa)
+
+
+def played(j):
+    return (j[0], MAZO[j[1]])
 
 
 JUGADORES = 4
