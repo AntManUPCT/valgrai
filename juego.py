@@ -11,6 +11,7 @@ from jugador import Jugador
 from estado import Estado
 from random import randint
 
+
 class domino_cb:
     def __init__(self, elegir, puntos, final, jugar, pasar):
         self.elegir = elegir  # función para elegir una ficha

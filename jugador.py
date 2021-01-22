@@ -71,6 +71,10 @@ class Jugador:
     def puntos(self):
         return score_fichas(self.fichas)
 
+    # Mis posibles opciones en función de mis fichas
+    # Las opciones son un par (LADO, CODIGO_FICHA)
+    # LADO = 'F' | 'L'
+    # CODIGO_FICHA = x in 1..MLEN
     def opciones(self, mesa):
         if len(mesa) == 0:
             return [('F', i) for i in codes(self.fichas)]
@@ -83,7 +87,12 @@ class Jugador:
                 result.append(('L', CODG[ficha]))
         return result
 
+    # Las posibles opciones de otro jugador en funcion de la información
+    # que tengo a partir de las fichas que ha ya puesto o si ha pasado
     def opciones_jugador(self, mesa, jugador):
+        if jugador == self.turno:
+            return self.opciones(mesa)
+
         result = []
         for fila in range(MLEN):
             ficha = MAZO[fila]
@@ -94,7 +103,7 @@ class Jugador:
                     result.append(('L', fila))
         return result
 
-    def jugar(self, lado, ficha, jugada, turno):
+    def jugar(self, lado, ficha, turno):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
@@ -111,7 +120,7 @@ class Jugador:
 
         return Jugador(self.turno, fichas, jugado)
 
-    def pasar(self, jugada, turno, mesa):
+    def pasar(self, turno, mesa):
         fichas = self.fichas.copy()
         jugado = self.jugado.copy()
 
