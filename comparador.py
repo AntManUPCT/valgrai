@@ -3,6 +3,8 @@
 import juego
 import entrenar
 import estrategia
+import minimax
+
 from domino import PUNTOS
 
 import numpy as np
@@ -11,11 +13,11 @@ import random
 
 class comparador:
 
-    def __init__(self, model):
-        self.policy = estrategia.Estrategia(model)
+    def __init__(self, policy):
+        self.policy = policy
         self.contadores = np.zeros((4,), dtype='int32')
 
-    def eleccion(self, mesa, jugador, opciones, jugada):
+    def eleccion(self, mesa, jugador, opciones):
         # Ordenador contra tres jugadores aleatorios
         if jugador.turno == 0:
             # Elige una ficha aleatoria
@@ -32,7 +34,7 @@ class comparador:
 
         elif jugador.turno == 3:
             # ORDENADOR
-            values = self.policy.evaluar(jugador, opciones, jugada)
+            values = self.policy.elegir(mesa, jugador, opciones)
             return opciones[np.argmax(values)]
 
     def finpartida(self, puntos):
@@ -58,8 +60,12 @@ if __name__ == '__main__':
     model = entrenar.modelo()
     model.load_weights('domino.hdf5')
 
+    # Crear una estrategia para el jugador listo
+    policyQfunct = estrategia.Qfunction(model)
+    policyMinMax = minimax.MiniMax(model)
+
     # Crear el verificador del modelo
-    comp = comparador(model)
+    comp = comparador(policyMinMax)
 
     # Jugar contra otros tres jugadores
     for i in range(100000):

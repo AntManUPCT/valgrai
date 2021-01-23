@@ -36,7 +36,7 @@ def play(state, cb, gamma=1.0):
 
     opciones = state.opciones()
     if len(opciones) > 0:
-        jugada = cb.elegir(state.mesa, state.jugador(), opciones, state.jugada)
+        jugada = cb.elegir(state.mesa, state.jugador(), opciones)
 
         new_state = state.jugar(jugada)
         cb.jugar(state, jugada)
@@ -72,7 +72,7 @@ def domino(cb, gamma=1.0):
 
 if __name__ == "__main__":
     cb = domino_cb(
-        lambda mesa, jugadr, opciones, turno: opciones[0],
+        lambda mesa, jugadr, opciones: opciones[0],
         lambda state, puntos: None,
         lambda puntos: print(puntos),
         lambda state, jugada: print(state.jugador().turno, played(jugada)),
