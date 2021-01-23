@@ -2,7 +2,7 @@
 import domino
 import juego
 from jugador import FEATURES
-import estrategia
+import policy
 
 import random
 import numpy as np
@@ -19,7 +19,7 @@ class generador:
 
     def __init__(self, model, bs, gamma=1.0, parejas=False):
         self.model = model
-        self.policy = estrategia.Estrategia(model)
+        self.policy = policy.QFunction(model)
         self.bs = bs   # Batch Size
         self.gamma = gamma
         self.parejas = parejas
@@ -37,11 +37,11 @@ class generador:
             lambda state: None
         )
 
-    def eleccion(self, mesa, jugador, opciones, jugada):
+    def eleccion(self, mesa, jugador, opciones):
         if random.random() > 0.9:
             return random.choice(opciones)
         else:
-            return self.policy.elegir(jugador, opciones, jugada)
+            return self.policy.elegir(mesa, jugador, opciones)
 
     def recompensa(self, state, puntos):
         juega = state.juega        # Indice del jugador que le toca jugar
@@ -97,7 +97,7 @@ def entrenar(model):
     # model.compile(loss='mse', optimizer='adam')
     model.compile(loss='binary_crossentropy', optimizer='rmsprop')
     # model.compile(loss='mse', optimizer='adadelta')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=10, verbose=1)
+    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=5000, verbose=1)
     model.save_weights('domino.hdf5')
     graficar(history)
 

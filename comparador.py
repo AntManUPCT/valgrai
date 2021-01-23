@@ -2,40 +2,21 @@
 
 import juego
 import entrenar
-import estrategia
+import policy
 import minimax
 
-from domino import PUNTOS
-
 import numpy as np
-import random
+import argparse
 
 
 class comparador:
 
-    def __init__(self, policy):
-        self.policy = policy
+    def __init__(self, policies):
+        self.policies = policies
         self.contadores = np.zeros((4,), dtype='int32')
 
     def eleccion(self, mesa, jugador, opciones):
-        # Ordenador contra tres jugadores aleatorios
-        if jugador.turno == 0:
-            # Elige una ficha aleatoria
-            return random.choice(opciones)
-
-        elif jugador.turno == 1:
-            # Elige una ficha aleatoria
-            return random.choice(opciones)
-
-        elif jugador.turno == 2:
-            # Elige la ficha de mayor puntuacion
-            values = [PUNTOS[f] for l, f in opciones]
-            return opciones[np.argmax(values)]
-
-        elif jugador.turno == 3:
-            # ORDENADOR
-            values = self.policy.elegir(mesa, jugador, opciones)
-            return opciones[np.argmax(values)]
+        return self.policies[jugador.turno].elegir(mesa, jugador, opciones)
 
     def finpartida(self, puntos):
         minpuntos = np.min(puntos)
@@ -56,19 +37,98 @@ class comparador:
 
 if __name__ == '__main__':
 
+    def RandomPolicies():
+        return [
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.RandomPolicy()
+        ]
+
+    def MaxValueVersusRandom():
+        return [
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.MaxValuePolicy()
+        ]
+
+    def QFunctionVersusRandom(model):
+        return [
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.QFunction(model)
+        ]
+
+    def MinMaxVersusRandom(model):
+        return [
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            minimax.MiniMax(model)
+        ]
+
+    def NeuralNetsVersusRandom(model):
+        return [
+            policy.RandomPolicy(),
+            policy.RandomPolicy(),
+            policy.QFunction(model),
+            minimax.MiniMax(model)
+        ]
+
+    def MaxValueVersusQFunction(model):
+        return [
+            policy.MaxValuePolicy(),
+            policy.QFunction(model),
+            policy.MaxValuePolicy(),
+            policy.QFunction(model)
+        ]
+
+    def MaxValueVersusMinMax(model):
+        return [
+            policy.MaxValuePolicy(),
+            minimax.MiniMax(model),
+            policy.MaxValuePolicy(),
+            minimax.MiniMax(model)
+        ]
+
+    def AllVersusAll(model):
+        return [
+            policy.QFunction(model),
+            minimax.MiniMax(model),
+            policy.MaxValuePolicy(),
+            policy.RandomPolicy()
+        ]
+
+    parser = argparse.ArgumentParser(description='Seleccionar jugadores')
+    parser.add_argument("-j", "--jugadores", help="Elegir el conjunto de jugadores")
+    args = parser.parse_args()
+
     # Cargar el modelo entrenado
     model = entrenar.modelo()
     model.load_weights('domino.hdf5')
 
-    # Crear una estrategia para el jugador listo
-    policyQfunct = estrategia.Qfunction(model)
-    policyMinMax = minimax.MiniMax(model)
-
     # Crear el verificador del modelo
-    comp = comparador(policyMinMax)
+    if args.jugadores == '0':
+        comp = comparador(RandomPolicies())
+    elif args.jugadores == '1':
+        comp = comparador(MaxValueVersusRandom())
+    elif args.jugadores == '2':
+        comp = comparador(QFunctionVersusRandom(model))
+    elif args.jugadores == '3':
+        comp = comparador(MinMaxVersusRandom(model))
+    elif args.jugadores == '4':
+        comp = comparador(NeuralNetsVersusRandom(model))
+    elif args.jugadores == '5':
+        comp = comparador(MaxValueVersusQFunction(model))
+    elif args.jugadores == '6':
+        comp = comparador(MaxValueVersusMinMax(model))
+    else:
+        comp = comparador(AllVersusAll(model))
 
-    # Jugar contra otros tres jugadores
-    for i in range(100000):
+    # A jugar todo el mundo
+    for i in range(4000):
         comp.jugar()
         if i % 1000 == 0:
             print(i, comp.contadores, end='\r')
