@@ -78,10 +78,10 @@ class generador:
 def modelo():
     # Modelo basado en red Perceptron Multi Capa
     model = Sequential()
-    model.add(Dense(200, activation='relu', input_shape=(FEATURES,)))
+    model.add(Dense(500, activation='relu', input_shape=(FEATURES,)))
+    model.add(Dense(1000, activation='relu'))
+    model.add(Dense(600, activation='relu'))
     model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(50, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     print(model.summary(80))
     if os.path.exists('domino.hdf5'):
