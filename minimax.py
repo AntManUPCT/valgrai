@@ -24,7 +24,7 @@ class MiniMax:
 
     def valoracion_final(self, jugadr):
         # Evaluar con la RN el estado alcanzado en la nueva mesa
-        return self.model.predict(jugadr.jugado.reshape((1, FEATURES)))
+        return self.model.predict(jugadr.jugado.reshape((1, FEATURES)), verbose=0)
 
     def seguir_jugando(self, mesa, jugadr, turno, deep_level):
         # Valorar recursivamente las jugadas del resto de jugadores

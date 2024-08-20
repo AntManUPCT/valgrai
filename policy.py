@@ -18,7 +18,7 @@ class QFunction:
             # Nuevo estado del jugador tras probar esta accion
             nj = jugador.jugar(lado, MAZO[index], jugador.turno)
             x = nj.jugado.reshape((1, FEATURES))
-            y = self.model.predict(x)
+            y = self.model.predict(x, verbose=0)
             values[i] = y
         return opciones[np.argmax(values)]
 
@@ -36,4 +36,3 @@ class MaxValuePolicy:
         # Elige la ficha de mayor puntuacion
         values = [PUNTOS[f] for l, f in opciones]
         return opciones[np.argmax(values)]
-

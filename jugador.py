@@ -88,7 +88,7 @@ class Jugador:
         return result
 
     # Las posibles opciones de otro jugador en funcion de la información
-    # que tengo a partir de las fichas que ha ya puesto o si ha pasado
+    # que tengo a partir de las fichas que ya ha puesto o si ha pasado
     def opciones_jugador(self, mesa, jugador):
         if jugador == self.turno:
             return self.opciones(mesa)

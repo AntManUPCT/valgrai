@@ -85,6 +85,14 @@ if __name__ == '__main__':
             policy.QFunction(model)
         ]
 
+    def MaxValueVersusRandomVersusQFunction(model):
+        return [
+            policy.MaxValuePolicy(),
+            policy.RandomPolicy(),
+            policy.MaxValuePolicy(),
+            policy.QFunction(model)
+        ]
+
     def MaxValueVersusMinMax(model):
         return [
             policy.MaxValuePolicy(),
@@ -124,14 +132,15 @@ if __name__ == '__main__':
         comp = comparador(MaxValueVersusQFunction(model))
     elif args.jugadores == '6':
         comp = comparador(MaxValueVersusMinMax(model))
+    elif args.jugadores == '7':
+        comp = comparador(MaxValueVersusRandomVersusQFunction(model))
     else:
         comp = comparador(AllVersusAll(model))
 
     # A jugar todo el mundo
     for i in range(4000):
         comp.jugar()
-        if i % 1000 == 0:
-            print(i, comp.contadores, end='\r')
+        print(i, comp.contadores, end='\r')
 
     print('Ganadas: ', comp.contadores)
     suma = sum(comp.contadores)
