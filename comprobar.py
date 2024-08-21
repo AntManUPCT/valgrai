@@ -3,34 +3,30 @@
 from domino import MAZO
 import juego
 import entrenar
-import estrategia
+import policy
+from resumido import Resumido
 import numpy as np
 
 
 class verificador:
 
-    def __init__(self, model):
-        self.policy = estrategia.Estrategia(model)
+    def __init__(self, model, bdmental):
+        self.policy = policy.QFunction(model)
+        self.bdmental = bdmental
 
-    def eleccion(self, mesa, jugador, opciones, turno):
+    def eleccion(self, mesa, jugador, opciones):
         # Ordenador contra tres humanos
         if jugador.turno == 0:
-            values = self.policy.evaluar(jugador, opciones, turno)
             print('ORDENADOR --------------------------------')
             print('Mesa ...: ' + mesa)
-            print('Opciones: [', end='')
-            for i, (lado, index) in enumerate(opciones):
-                print('({}/{} {}), '.format(i, lado, MAZO[index]), end='')
-            print('')
-            print('ValoresQ: ', values)
-            return opciones[np.argmax(values)]
+            opcion = self.policy.elegir(mesa, jugador, opciones)
+            print('Juega ..: ', opcion)
+            return opcion
         else:
-            values = self.policy.evaluar(jugador, opciones, turno)
             print('HUMANO {} ---------------------------------'.format(jugador.turno))
             print('Mesa ...: ' + mesa)
             print('Fichas..: ', jugador.fichas)
-            for i, (lado, index) in enumerate(opciones):
-                print('Opcion {}: {} {} ({})'.format(i, lado, MAZO[index], values[i]))
+            print('Opciones: ', opciones)
 
             opcion = int(input('Opcion elegida: '))
             return opciones[opcion]
@@ -50,18 +46,20 @@ class verificador:
             lambda state, jugada: None,
             lambda state: None
         )
-        juego.domino(cb)
+        juego.domino(cb, bdmental)
 
 
 if __name__ == '__main__':
 
+    # Defnir la BD mental del jugador
+    bdmental = Resumido
+
     # Cargar el modelo entrenado
-    model = entrenar.modelo()
+    model = entrenar.modelo(bdmental.num_features())
     model.load_weights('domino.hdf5')
 
     # Crear el verificador del modelo
-    verif = verificador(model)
+    verif = verificador(model, bdmental)
 
     # Mostrar la evaluacion del la funcion Q tras el entrenamiento
     verif.funcion_Q()
-

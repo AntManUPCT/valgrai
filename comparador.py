@@ -3,7 +3,6 @@
 import juego
 import entrenar
 import policy
-import minimax
 
 import numpy as np
 import argparse
@@ -61,22 +60,6 @@ if __name__ == '__main__':
             policy.QFunction(model)
         ]
 
-    def MinMaxVersusRandom(model):
-        return [
-            policy.RandomPolicy(),
-            policy.RandomPolicy(),
-            policy.RandomPolicy(),
-            minimax.MiniMax(model)
-        ]
-
-    def NeuralNetsVersusRandom(model):
-        return [
-            policy.RandomPolicy(),
-            policy.RandomPolicy(),
-            policy.QFunction(model),
-            minimax.MiniMax(model)
-        ]
-
     def MaxValueVersusQFunction(model):
         return [
             policy.MaxValuePolicy(),
@@ -93,18 +76,10 @@ if __name__ == '__main__':
             policy.QFunction(model)
         ]
 
-    def MaxValueVersusMinMax(model):
-        return [
-            policy.MaxValuePolicy(),
-            minimax.MiniMax(model),
-            policy.MaxValuePolicy(),
-            minimax.MiniMax(model)
-        ]
-
     def AllVersusAll(model):
         return [
             policy.QFunction(model),
-            minimax.MiniMax(model),
+            policy.QFunction(model),
             policy.MaxValuePolicy(),
             policy.RandomPolicy()
         ]

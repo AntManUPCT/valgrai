@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import domino
 import juego
-from jugador import FEATURES
 import policy
+from resumido import Resumido
 
 import random
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Input, Dense
 import matplotlib.pyplot as plt
 import os.path
 
@@ -17,15 +17,16 @@ import os.path
 
 class generador:
 
-    def __init__(self, model, bs, gamma=1.0, parejas=False):
+    def __init__(self, model, bdmental, bs, gamma=1.0, parejas=False):
         self.model = model
+        self.bdmental = bdmental
         self.policy = policy.QFunction(model)
         self.bs = bs   # Batch Size
         self.gamma = gamma
         self.parejas = parejas
         self.maxsize = 4 * bs
         self.offset = 0
-        self.x_train = np.zeros((self.maxsize, FEATURES), dtype='float32')
+        self.x_train = np.zeros((self.maxsize, bdmental.num_features()), dtype='float32')
         self.y_train = np.zeros((self.maxsize, 1), dtype='float32')
         self.indx = 0
         self.dc = 0
@@ -53,7 +54,7 @@ class generador:
             y = 1.0 if juega == gana1 or juega == gana2 else 0.0
 
         # Generar un elemento de entrenamiento
-        self.x_train[self.indx, :] = state.jugadores[juega].jugado.reshape((FEATURES,))
+        self.x_train[self.indx, :] = state.jugadores[juega].estado.get_features()
         self.y_train[self.indx, :] = y
         self.indx = (self.indx + 1) % self.maxsize  # Indice en el buffer circular
         self.dc += 1  # data counter
@@ -72,32 +73,31 @@ class generador:
                 yield self.x_train[first:last, :], self.y_train[first:last, :]
 
             while self.dc < self.bs:
-                juego.domino(self.cb, self.gamma)
+                juego.domino(self.cb, self.bdmental, self.gamma)
 
 
-def modelo():
+def modelo(features):
     # Modelo basado en red Perceptron Multi Capa
     model = Sequential()
-    model.add(Dense(500, activation='relu', input_shape=(FEATURES,)))
-    model.add(Dense(1000, activation='relu'))
-    model.add(Dense(600, activation='relu'))
+    model.add(Input((features,)))
     model.add(Dense(100, activation='relu'))
+    model.add(Dense(60, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
-    print(model.summary(80))
+    model.summary(80)
     if os.path.exists('domino.hdf5'):
         model.load_weights('domino.hdf5')
 
     return model
 
 
-def entrenar(model):
-    gen = generador(model, 20000, 0.95)  # , True)
+def entrenar(model, bdmental):
+    gen = generador(model, bdmental, 1000, 0.95)
     # model.compile(loss='mse', optimizer='sgd')
     # model.compile(loss='mse', optimizer='rmsprop')
     # model.compile(loss='mse', optimizer='adam')
     model.compile(loss='binary_crossentropy', optimizer='rmsprop')
     # model.compile(loss='mse', optimizer='adadelta')
-    history = model.fit_generator(gen.generar(), steps_per_epoch=10, epochs=5000, verbose=1)
+    history = model.fit(gen.generar(), steps_per_epoch=10, epochs=50, verbose=1)
     model.save_weights('domino.hdf5')
     graficar(history)
 
@@ -115,4 +115,5 @@ def graficar(history):
 
 
 if __name__ == "__main__":
-    entrenar(modelo())
+    bdmental = Resumido
+    entrenar(modelo(bdmental.num_features()), bdmental)

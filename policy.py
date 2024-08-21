@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from domino import MAZO, PUNTOS
-from jugador import FEATURES
 
 import numpy as np
 import random
@@ -17,7 +16,7 @@ class QFunction:
         for i, (lado, index) in enumerate(opciones):
             # Nuevo estado del jugador tras probar esta accion
             nj = jugador.jugar(lado, MAZO[index], jugador.turno)
-            x = nj.jugado.reshape((1, FEATURES))
+            x = nj.estado.get_features()
             y = self.model.predict(x, verbose=0)
             values[i] = y
         return opciones[np.argmax(values)]

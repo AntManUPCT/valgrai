@@ -1,0 +1,35 @@
+* Listado de palabras del domino
+
+Se considera que una partida es una frase en el lenguaje del dominó.
+Cada palabra es la jugada de un jugador, Indica la ficha puesta y el
+lado en el que se coloca
+
+Por ejemplo:
+
+   66 61 IZDA 11 IZDA 63 DCHA ... PASS ... FICHAS 35 21 04
+
+Así, entonces todo el vocabulario se reduce a las 28 fichas mas el
+lado de la fila en el que se coloca.
+
+Además de las fichas existen unas palabras especiales para indicar
+cuando un jugador pasa de jugar (no tiene fichas que jugar).
+
+Tambien es necesario un token adicional para indicar las fichas
+con las que debe jugar el jugador.
+
+la entrada al transformer sera la lista completa de todas las jugadas
+de los jugadores, incluyendo las veces que cada jugador pasa.
+
+en total sera:
+
+   (28 fichas) + (2 lados) + PASA + FICHAS = 28 + 2 + 1 + 1 = 32 palabras
+
+El la longitud máxima de una frase en este lenguaje será el munero máximo
+de jugadas que se pueden hacer.
+
+En el peor de los caso, si ningun jugador pasa se colocarán las 28 piezas,
+
+El objetivo es obtener un estado representativo de la partida
+y entrenar una red neuronal que evalue probabilidad de ganar en ese estado
+
+

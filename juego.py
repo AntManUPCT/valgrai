@@ -9,8 +9,8 @@ Created on Mon Dec 30 10:36:35 2019
 from domino import shuffle, take, played, JUGADORES
 from jugador import Jugador
 from estado import Estado
+from resumido import Resumido
 from random import randint
-
 
 class domino_cb:
     def __init__(self, elegir, puntos, final, jugar, pasar):
@@ -37,10 +37,9 @@ def play(state, cb, gamma=1.0):
     opciones = state.opciones()
     if len(opciones) > 0:
         jugada = cb.elegir(state.mesa, state.jugador(), opciones)
-
-        new_state = state.jugar(jugada)
         cb.jugar(state, jugada)
 
+        new_state = state.jugar(jugada)
         if new_state.fin_partida():
             return fin_partida(new_state, cb)
 
@@ -53,15 +52,15 @@ def play(state, cb, gamma=1.0):
     return puntos
 
 
-def domino(cb, gamma=1.0):
+def domino(cb, bdmental, gamma=1.0):
     ''' Inicia el juego de una nueva partida de domino '''
 
     mezcla = shuffle()
 
-    j1 = Jugador(0, take(mezcla, 7))
-    j2 = Jugador(1, take(mezcla, 7))
-    j3 = Jugador(2, take(mezcla, 7))
-    j4 = Jugador(3, take(mezcla, 7))
+    j1 = Jugador(0, take(mezcla, 7), bdmental())
+    j2 = Jugador(1, take(mezcla, 7), bdmental())
+    j3 = Jugador(2, take(mezcla, 7), bdmental())
+    j4 = Jugador(3, take(mezcla, 7), bdmental())
 
     juegan = [j1, j2, j3, j4]
     empieza = randint(0, JUGADORES - 1)
