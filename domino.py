@@ -11,7 +11,10 @@ import random
 MAZO = [str(a) + str(b) for a in range(7) for b in range(a, 7)]
 MLEN = len(MAZO)
 CODG = {f: i for i, f in enumerate(MAZO)}
+TKNS = ['IZDA', 'DCHA', 'PASA', 'FICHAS']
+CODW = {f: i for i, f in enumerate(TKNS, MLEN)}
 
+WORDS = {**CODG, **CODW}
 
 def codes(fichas):
     return [i for i in map(lambda f: CODG[f], fichas)]
@@ -78,9 +81,9 @@ def put_last(ficha, fichas):
 
 
 def poner_ficha(mesa, lado, ficha):
-    if lado == 'F':
+    if lado == 'IZDA':
         return put_first(ficha, mesa)
-    elif lado == 'L':
+    elif lado == 'DCHA':
         return put_last(ficha, mesa)
 
 
@@ -89,3 +92,13 @@ def played(j):
 
 
 JUGADORES = 4
+
+if __name__ == '__main__':
+    print('Mazo: ', MAZO)
+    print('MLen: ', MLEN)
+    print('Codg: ', CODG)
+    print('Tkns: ', TKNS)
+    print('Codw: ', CODW)
+    print('Words: ', WORDS)
+    print('Puntos: ', PUNTOS)
+    print('Max puntos:', MAX_PUNTOS)

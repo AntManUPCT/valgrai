@@ -30,14 +30,14 @@ class Jugador:
     # CODIGO_FICHA = x in 1..MLEN
     def opciones(self, mesa):
         if len(mesa) == 0:
-            return [('F', i) for i in codes(self.fichas)]
+            return [('IZDA', i) for i in codes(self.fichas)]
 
         result = []
         for ficha in self.fichas:
             if try_first(ficha, mesa):
-                result.append(('F', CODG[ficha]))
+                result.append(('IZDA', CODG[ficha]))
             if try_last(ficha, mesa):
-                result.append(('L', CODG[ficha]))
+                result.append(('DCHA', CODG[ficha]))
         return result
 
     def jugar(self, lado, ficha, turno):
