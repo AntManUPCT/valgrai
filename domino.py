@@ -12,9 +12,8 @@ MAZO = [str(a) + str(b) for a in range(7) for b in range(a, 7)]
 MLEN = len(MAZO)
 CODG = {f: i for i, f in enumerate(MAZO)}
 TKNS = ['IZDA', 'DCHA', 'PASA', 'FICHAS']
-CODW = {f: i for i, f in enumerate(TKNS, MLEN)}
 
-WORDS = {**CODG, **CODW}
+WORDS = MAZO + TKNS
 
 def codes(fichas):
     return [i for i in map(lambda f: CODG[f], fichas)]
@@ -98,7 +97,6 @@ if __name__ == '__main__':
     print('MLen: ', MLEN)
     print('Codg: ', CODG)
     print('Tkns: ', TKNS)
-    print('Codw: ', CODW)
     print('Words: ', WORDS)
     print('Puntos: ', PUNTOS)
     print('Max puntos:', MAX_PUNTOS)
