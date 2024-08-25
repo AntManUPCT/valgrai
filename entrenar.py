@@ -15,6 +15,7 @@ import os.path
 # La funcion choice() seleccionará una accion usando el modelo provisional
 # La funcion puntuar() entrenara el modelo con las recompensas obtenidas
 
+fichero_pesos = './pesos/valgrai/mse/domino.weights.h5'
 
 class generador:
 
@@ -85,8 +86,8 @@ def modelo(features):
     model.add(Dense(60, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     model.summary(80)
-    if os.path.exists('domino.weights.h5'):
-        model.load_weights('domino.weights.h5')
+    if os.path.exists(fichero_pesos):
+        model.load_weights(fichero_pesos)
 
     return model
 
@@ -98,7 +99,7 @@ def entrenar(model, bdmental):
     model.compile(loss='mse', optimizer='adam')
     # model.compile(loss='mse', optimizer='adadelta')
     history = model.fit(gen.generar(), steps_per_epoch=10, epochs=50, verbose=1)
-    model.save_weights('domino.weights.h5')
+    model.save_weights(fichero_pesos)
     graficar(history)
 
 
@@ -115,5 +116,5 @@ def graficar(history):
 
 
 if __name__ == "__main__":
-    bdmental = Resumido
+    bdmental = [Resumido, Resumido, Resumido, Resumido]
     entrenar(modelo(bdmental.num_features()), bdmental)

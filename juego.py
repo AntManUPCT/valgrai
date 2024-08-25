@@ -52,15 +52,15 @@ def play(state, cb, gamma=1.0):
     return puntos
 
 
-def domino(cb, bdmental, gamma=1.0):
+def domino(cb, bd, gamma=1.0):
     ''' Inicia el juego de una nueva partida de domino '''
 
     mezcla = shuffle()
 
-    j1 = Jugador(0, take(mezcla, 7), bdmental())
-    j2 = Jugador(1, take(mezcla, 7), bdmental())
-    j3 = Jugador(2, take(mezcla, 7), bdmental())
-    j4 = Jugador(3, take(mezcla, 7), bdmental())
+    j1 = Jugador(0, take(mezcla, 7), bd[0]())
+    j2 = Jugador(1, take(mezcla, 7), bd[1]())
+    j3 = Jugador(2, take(mezcla, 7), bd[2]())
+    j4 = Jugador(3, take(mezcla, 7), bd[3]())
 
     juegan = [j1, j2, j3, j4]
     empieza = randint(0, JUGADORES - 1)

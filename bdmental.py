@@ -24,7 +24,7 @@ class BDMental:
 
     def copy(self):
         """Clona la base de datos"""
-        pass
+        return self
 
     def ficha_puesta(self, ficha, lado, jugador):
         """Actualiza la BD con la nueva ficha colocada"""

@@ -13,7 +13,6 @@ import os.path
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Dense, Embedding, Input, GlobalAveragePooling1D
 from tensorflow.keras.models import Model
-# from keras_nlp.layers import TransformerEncoder
 
 from domino import WORDS
 
@@ -22,6 +21,7 @@ from domino import WORDS
 
 palabras = [' '.join(WORDS)]
 max_len = 50 # Longitud máxima de una partida
+fichero_pesos = './pesos/valgrai/transfo/domino.weights.h5'
 
 class generador:
 
@@ -145,8 +145,8 @@ def modelo(training):
 
     model.summary(80)
 
-    if os.path.exists('transfo.domino.hdf5'):
-        model.load_weights('transfo.domino.hdf5')
+    if os.path.exists(fichero_pesos):
+        model.load_weights(fichero_pesos)
 
     return model
 
@@ -155,7 +155,7 @@ def entrenar(model, max_len, bdmental):
     gen = generador(model, max_len, bdmental, 1000, 0.95)
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     history = model.fit(gen.generar(), steps_per_epoch=10, epochs=50, verbose=1)
-    model.save_weights('domino.weights.h5')
+    model.save_weights(fichero_pesos)
     graficar(history)
 
 
@@ -172,5 +172,5 @@ def graficar(history):
 
 
 if __name__ == "__main__":
-    bdmental = Textual
+    bdmental = [Textual, Textual, Textual, Textual]
     entrenar(modelo(True), max_len, bdmental)
